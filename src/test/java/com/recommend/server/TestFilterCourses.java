@@ -14,25 +14,25 @@ import java.util.List;
 public class TestFilterCourses {
     @Test
     void testFilterCourses() {
-        List<Course> cursos = new ArrayList<>();
-        cursos.add(new Course("Química", Arrays.asList("Matemática")));
-        cursos.add(new Course("Direito", Arrays.asList("Focado", "Sério")));
-        cursos.add(new Course("Artes", Arrays.asList("Criatividade", "Descontraido")));
-        List<String> habUsuario = Arrays.asList("Matemática", "Focado", "Descontraido", "Trabalho remoto", "Criatividade");
-        List<String> nPode = Arrays.asList("Sério", "Não fala em público");
+        List<Course> courses = new ArrayList<>();
+        courses.add(new Course("Química", Arrays.asList("Matemática", "Curioso", "Sério")));
+        courses.add(new Course("Direito", Arrays.asList("Focado", "Sério", "Falar em público")));
+        courses.add(new Course("Artes", Arrays.asList("Criatividade", "Descontraido")));
+        List<String> abilities = Arrays.asList("Matemática", "Focado", "Descontraido", "Trabalho remoto", "Criatividade");
+        List<String> userCantBe = Arrays.asList("Sério", "Falar em público");
 
-        List<CourseResponse> possivel = cursos.stream()
-                .filter(curso -> curso.hab().stream().noneMatch(nPode::contains))
+        List<CourseResponse> possible = courses.stream()
+                .filter(course -> course.hab().stream().noneMatch(userCantBe::contains))
                 .map(curso -> {
-                    int score = curso.compare(habUsuario);
+                    int score = curso.compare(abilities);
                     return new CourseResponse(score, curso);
                 })
-                .filter(resp -> resp.getIncidencia() > 0)
-                .sorted(Comparator.comparingInt(CourseResponse::getIncidencia).reversed())
+                .filter(resp -> resp.incidence() > 0)
+                .sorted(Comparator.comparingInt(CourseResponse::incidence).reversed())
                 .toList();
 
         System.out.println("Recommended courses:");
-        possivel.forEach(c -> System.out.println(c.getCourse().nome() + " - Afinidade: " + c.getIncidencia()));
+        possible.forEach(c -> System.out.println(c.getCourse().nome() + " - Afinidade: " + c.incidence()));
     }
 
 }
