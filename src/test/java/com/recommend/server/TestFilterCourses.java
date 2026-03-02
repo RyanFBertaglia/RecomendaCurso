@@ -1,7 +1,7 @@
 package com.recommend.server;
 
-import com.recommend.server.dto.CourseResponse;
 import com.recommend.server.model.Course;
+import com.recommend.server.dto.CourseResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -22,7 +22,7 @@ public class TestFilterCourses {
         List<String> userCantBe = Arrays.asList("Sério", "Falar em público");
 
         List<CourseResponse> possible = courses.stream()
-                .filter(course -> course.hab().stream().noneMatch(userCantBe::contains))
+                .filter(course -> course.getAbilities().stream().noneMatch(userCantBe::contains))
                 .map(curso -> {
                     int score = curso.compare(abilities);
                     return new CourseResponse(score, curso);
@@ -32,7 +32,7 @@ public class TestFilterCourses {
                 .toList();
 
         System.out.println("Recommended courses:");
-        possible.forEach(c -> System.out.println(c.getCourse().nome() + " - Afinidade: " + c.incidence()));
+        possible.forEach(c -> System.out.println(c.course().getName() + " - Afinidade: " + c.incidence()));
     }
 
 }
