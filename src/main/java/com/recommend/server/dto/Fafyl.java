@@ -2,4 +2,4 @@ package com.recommend.server.dto;
 
 import com.recommend.server.model.Course;
 
-public record CourseResponse(int incidence, Course course) { }
+public record Fafyl(int incidence, Course course) { }

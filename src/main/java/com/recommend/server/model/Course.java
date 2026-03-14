@@ -1,12 +1,20 @@
 package com.recommend.server.model;
 
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class Course {
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
     private String name;
     private List<String> abilities;
     private List<String> cantBe;
