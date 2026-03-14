@@ -19,3 +19,6 @@ target/
 
 .vscode/
 .env
+src/main/resources/
+src/test/resources/
+data:dcbapp.mv.db

@@ -49,8 +49,8 @@ public class DataMock {
         CourseImp course = new CourseImp();
         course.setId(id);
         course.setName(name);
-        course.setIdCourse(idCourse);
-        course.setIdCollege(idCollege);
+        course.setCourse(null);
+        course.setCollege(null);
         course.setFees(fees);
         course.setDetails(details);
         course.setLocale(new Coordinates(lat, lon));
