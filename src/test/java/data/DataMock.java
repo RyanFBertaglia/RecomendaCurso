@@ -63,4 +63,8 @@ public class DataMock {
         return new Coordinates(-22.9059, -47.0590);
     }
 
+    public static List<Integer> courses() {
+        return Arrays.asList(2, 3, 7, 5);
+    }
+
 }
