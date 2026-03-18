@@ -1,9 +1,6 @@
 package com.recommend.server.controller;
 
-import com.recommend.server.dto.AuthResponse;
-import com.recommend.server.dto.LoginRequest;
-import com.recommend.server.dto.RegisterRequest;
-import com.recommend.server.dto.UserDTO;
+import com.recommend.server.dto.*;
 import com.recommend.server.model.User;
 import com.recommend.server.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,5 +34,10 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<UserDTO> me() {
         return ResponseEntity.ok(authService.getUser());
+    }
+
+    @PostMapping("/coordinates")
+    public ResponseEntity<UserDTO> addCoordinates(@RequestBody Coordinates coordinates) {
+        return ResponseEntity.ok(authService.addCoordinates(coordinates));
     }
 }

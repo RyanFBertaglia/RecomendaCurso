@@ -1,9 +1,6 @@
 package com.recommend.server.service;
 
-import com.recommend.server.dto.AuthResponse;
-import com.recommend.server.dto.LoginRequest;
-import com.recommend.server.dto.RegisterRequest;
-import com.recommend.server.dto.UserDTO;
+import com.recommend.server.dto.*;
 import com.recommend.server.model.User;
 import com.recommend.server.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -83,14 +80,23 @@ public class AuthService {
     }
 
     public UserDTO getUser() {
-        String email = (String) Objects.requireNonNull(SecurityContextHolder
-                        .getContext()
-                        .getAuthentication())
-                .getPrincipal();
-
+        String email = getUserEmail();
         User user = userRepository.findByEmail(email)
                 .orElseThrow();
 
         return user.getUserDTO();
+    }
+
+    public String getUserEmail() {
+        return (String) Objects.requireNonNull(SecurityContextHolder
+                        .getContext()
+                        .getAuthentication())
+                .getPrincipal();
+    }
+
+    public UserDTO addCoordinates(Coordinates coordinates) {
+        String email = getUserEmail();
+        userRepository.updateCoordinates(email, coordinates);
+        return getUser();
     }
 }
