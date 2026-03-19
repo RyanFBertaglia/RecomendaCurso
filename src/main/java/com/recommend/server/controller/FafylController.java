@@ -1,9 +1,11 @@
 package com.recommend.server.controller;
 
+import com.recommend.server.dto.Coordinates;
 import com.recommend.server.dto.Fafyl;
 import com.recommend.server.dto.Quiz;
 import com.recommend.server.model.Course;
 import com.recommend.server.model.CourseImp;
+import com.recommend.server.service.AuthService;
 import com.recommend.server.service.FafylService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,9 @@ public class FafylController {
     @Autowired
     FafylService fafylService;
 
+    @Autowired
+    AuthService authService;
+
     @GetMapping("/fafyl")
     public ResponseEntity<List<Fafyl>> findAllFafyl(
             @RequestBody Quiz quiz) {
@@ -27,7 +32,25 @@ public class FafylController {
         List<Fafyl> fafyl = fafylService.findAllFafyl(quiz);
         return ResponseEntity.ok(fafyl);
     }
+
+    @GetMapping("/fafyl/courses")
+    public ResponseEntity<List<CourseImp>> findAllCourses(
+            @RequestParam(required = false) Double distance,
+            @RequestBody List<Integer> courses
+    ) {
+        List<CourseImp> possible;
+        Coordinates userLocation = authService.getUser().locale();
+        if(distance != null) {
+            possible =  fafylService.findInDistance(courses, distance, userLocation);
+            return ResponseEntity.ok(possible);
+        }
+        return ResponseEntity.ok(fafylService.findInDistance(courses));
+    }
     /*
+
+    Envia a lista de cursos de interesse do usuário
+    Busca os cursosimp segundo o filtro
+
     // /course?distance=3000
     @GetMapping("/fafyl/courses")
     public ResponseEntity<List<CourseImp>> findAllCourses(
@@ -47,24 +70,7 @@ public class FafylController {
     }
 
 
-    // /fafyl
-    @GetMapping("/fafyl")
-    public ResponseEntity<?> findAllFafyl() {
-        return ResponseEntity.ok(dataService.findAllFafyl());
-    }
-
     // /course?distance=3000
-    @GetMapping("/course")
-    public ResponseEntity<?> findAllCourses(
-            @RequestParam(required = false) Double distance
-    ) {
-        List<CourseImp> possible = new ArrayList<>();
-        if(distance != null) {
-            // courses.findInDistance(distance, idCourse)
-            return ResponseEntity.ok(possible);
-        }
-        return ResponseEntity.ok(possible);
-    }
 
 */
 
