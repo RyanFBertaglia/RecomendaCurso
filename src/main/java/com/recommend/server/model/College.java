@@ -25,4 +25,5 @@ public class College {
     private List<CourseImp> courses;
     private Coordinates locale;
     private String description;
+    private String image;
 }
