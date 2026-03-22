@@ -7,8 +7,10 @@ import com.recommend.server.model.College;
 import com.recommend.server.model.Course;
 import com.recommend.server.model.CourseImp;
 import com.recommend.server.service.DataService;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -45,9 +47,14 @@ public class DataController {
         return ResponseEntity.ok(dataService.findAllColleges());
     }
 
-    @PostMapping("/college")
+    @PostMapping(value = "/college")
     public ResponseEntity<List<College>> insertColleges(@RequestBody List<CollegeDTO> colleges) {
         return ResponseEntity.ok(dataService.insertColleges(colleges));
+    }
+
+    @PostMapping("/college/{id}/image")
+    public ResponseEntity<College> updateCollegeImage(@PathVariable Integer id, @RequestParam MultipartFile image) {
+        return ResponseEntity.ok(dataService.updateCollegeImage(id, image));
     }
 
     @PostMapping("/college/{id}/course")

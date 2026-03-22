@@ -11,12 +11,23 @@ import com.recommend.server.repository.CourseImpRepository;
 import com.recommend.server.repository.CourseRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.*;
 
 @Service
 public class DataService {
+
+    @Value("${app.upload.dir:src/main/resources/static/img/}")
+    private String IMG_DIR;
+    private static final String URL_PREFIX = "/storage/";
 
     private final CourseRepository courseRepository;
     private final CollegeRepository collegeRepository;
@@ -74,7 +85,13 @@ public class DataService {
             college.setDescription(collegeDTO.description());
             college.setLocale(collegeDTO.locale());
 
-            List<CourseImp> courseImps = collegeDTO.courses().stream().map(impDTO -> {
+            if (collegeDTO.image() != null && !collegeDTO.image().isEmpty()) {
+                String filename = saveImage(collegeDTO.image());
+                college.setImage(filename);
+            }
+
+            List<CourseImpDTO> list = collegeDTO.courses();
+            List<CourseImp> courseImps = list.stream().map(impDTO -> {
                 CourseImp courseImp = new CourseImp();
                 courseImp.setName(impDTO.name());
 
@@ -108,6 +125,38 @@ public class DataService {
 
         courseImp.setCollege(college);
         return courseImpRepository.save(courseImp);
+    }
+
+    public String saveImage(MultipartFile file) {
+        try {
+            String original = Objects.requireNonNull(file.getOriginalFilename());
+            String ext = original.contains(".")
+                    ? original.substring(original.lastIndexOf('.'))
+                    : "";
+            String filename = UUID.randomUUID().toString().substring(0, 8) + ext;
+
+            Path targetPath = Paths.get(IMG_DIR).resolve(filename);
+            Files.createDirectories(targetPath.getParent());
+            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+
+            return URL_PREFIX + filename;
+        } catch (IOException e) {
+            throw new RuntimeException("Falha ao salvar imagem: " + e.getMessage(), e);
+        }
+    }
+
+    @Transactional
+    public College updateCollegeImage(Integer collegeId, MultipartFile imageFile) {
+        College college = collegeRepository.findById(collegeId)
+                .orElseThrow(() -> new RuntimeException("College not found with ID: " + collegeId));
+        
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String filename = saveImage(imageFile);
+            college.setImage(filename);
+            return collegeRepository.save(college);
+        }
+        
+        return college;
     }
 
     public List<Course> findAllModelCourses() {
