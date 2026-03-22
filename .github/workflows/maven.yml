@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: Java CI (Tests)
 
 on:
   push:
@@ -7,17 +7,44 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  test:
 
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Criar application-test.properties
+        run: |
+          mkdir -p src/test/resources
+          cat <<EOF > src/test/resources/application-test.properties
+          spring.application.name=server
+
+          geoapify.api.key=${GEOAPIFY_API_KEY}
+
+          spring.datasource.url=jdbc:h2:mem:testdb
+          spring.datasource.driver-class-name=org.h2.Driver
+          spring.datasource.username=sa
+          spring.datasource.password=password
+
+          spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+          spring.jpa.hibernate.ddl-auto=update
+
+          jwt.secret=${JWT_SECRET}
+          EOF
+        env:
+          GEOAPIFY_API_KEY: ${{ secrets.GEOAPIFY_API_KEY }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+
+      - name: Rodar build e testes
+        run: mvn -B clean verify
+        env:
+          SPRING_PROFILES_ACTIVE: test
