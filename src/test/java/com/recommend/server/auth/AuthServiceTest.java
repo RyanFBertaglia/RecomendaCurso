@@ -56,21 +56,29 @@ public class AuthServiceTest {
 
     @Test
     void shouldLoginAndReturnToken() {
-        LoginRequest request =
-                new LoginRequest("ryan@email.com","123456");
+        String email = "ryan@email.com";
+        String rawPassword = "123456";
+        String encodedPassword = "encoded-password";
+        LoginRequest request = new LoginRequest(email, rawPassword);
 
         User user = new User();
-        user.setEmail("ryan@email.com");
+        user.setEmail(email);
+        user.setPassword(encodedPassword);
 
-        when(userRepository.findByEmail("ryan@email.com"))
+        when(userRepository.findByEmail(email))
                 .thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(rawPassword, encodedPassword))
+                .thenReturn(true);
         when(jwtService.generateToken(user))
                 .thenReturn("jwt-token");
 
         AuthResponse response = authService.login(request);
         assertEquals("jwt-token", response.token());
-    }
 
+        verify(userRepository).findByEmail(email);
+        verify(passwordEncoder).matches(rawPassword, encodedPassword);
+        verify(jwtService).generateToken(user);
+    }
     @Test
     void shouldRefreshToken() {
 

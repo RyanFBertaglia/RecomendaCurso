@@ -1,6 +1,9 @@
 package com.recommend.server.location;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.recommend.server.dto.Coordinates;
+import com.recommend.server.exception.LocationNotFound;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.client.RestTemplate;
@@ -9,27 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 public class CepToCoordinatesTest {
-
-    private RestTemplate restTemplate;
-
-    @Test
-    void getALatLong() {
-        RestTemplate restTemplate = new RestTemplate();
-        int cep=13060473;
-
-        String json = restTemplate.getForObject(
-                "https://brasilapi.com.br/api/cep/v2/" + cep,
-                String.class
-        );
-
-        if (json == null) throw new AssertionError();
-        String latitude = json.split("\"latitude\":\"")[1].split("\"")[0];
-        String longitude = json.split("\"longitude\":\"")[1].split("\"")[0];
-
-        Coordinates coordinates = new Coordinates(Double.valueOf(latitude), Double.valueOf(longitude));
-        assertNotNull(coordinates, "The coordinates must exist");
-        IO.println(coordinates);
-    }
 
     @Test
     void getApproximated() {
@@ -61,5 +43,4 @@ public class CepToCoordinatesTest {
         assertNotNull(coordinates, "It should give an approximated location");
         System.out.println(coordinates);
     }
-
 }
