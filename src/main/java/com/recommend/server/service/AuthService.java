@@ -1,6 +1,9 @@
 package com.recommend.server.service;
 
 import com.recommend.server.dto.*;
+import com.recommend.server.exception.BadCredentials;
+import com.recommend.server.exception.EmailAlreadyExists;
+import com.recommend.server.exception.TokenInvalid;
 import com.recommend.server.model.User;
 import com.recommend.server.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,12 +34,13 @@ public class AuthService {
     public AuthResponse register(RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.email()))
-            throw new RuntimeException("Email já existe");
+            throw new EmailAlreadyExists();
 
         User user = new User();
 
         user.setName(request.name());
         user.setEmail(request.email());
+        user.setLocale(request.locale());
         user.setPassword(passwordEncoder.encode(request.password()));
 
         userRepository.save(user);
@@ -48,10 +52,10 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow();
+                .orElseThrow(BadCredentials::new);
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new RuntimeException("Senha inválida");
+            throw new BadCredentials();
         }
 
         String token = jwtService.generateToken(user);
@@ -69,10 +73,10 @@ public class AuthService {
         String email = jwtService.extractUserEmail(token);
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow();
+                .orElseThrow(BadCredentials::new);
 
         if (!jwtService.isTokenValid(token, user))
-            throw new RuntimeException("Token inválido");
+            throw new TokenInvalid("Invalid token");
 
         String newToken = jwtService.generateToken(user);
 
