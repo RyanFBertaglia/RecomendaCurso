@@ -1,6 +1,7 @@
 package com.recommend.server.auth;
 
 import com.recommend.server.dto.AuthResponse;
+import com.recommend.server.dto.Coordinates;
 import com.recommend.server.dto.LoginRequest;
 import com.recommend.server.dto.RegisterRequest;
 import com.recommend.server.model.User;
@@ -43,7 +44,7 @@ public class AuthServiceTest {
     void shouldRegisterUser() {
 
         RegisterRequest request =
-                new RegisterRequest("Ryan","ryan@email.com","123456");
+                new RegisterRequest("Ryan","ryan@email.com","123456", new Coordinates(32.0, 32.0));
 
         when(userRepository.existsByEmail("ryan@email.com"))
                 .thenReturn(false);

@@ -2,6 +2,7 @@ package com.recommend.server.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import com.recommend.server.dto.Coordinates;
 import com.recommend.server.dto.LoginRequest;
 import com.recommend.server.dto.RegisterRequest;
 
@@ -49,7 +50,7 @@ class AuthControllerTest {
     void shouldRegisterUser() throws Exception {
 
         RegisterRequest request =
-                new RegisterRequest("Ryan", uniqueEmail(), "123456");
+                new RegisterRequest("Ryan", uniqueEmail(), "123456", new Coordinates(32.0, 32.0));
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -65,7 +66,7 @@ class AuthControllerTest {
         String email = uniqueEmail();
 
         RegisterRequest register =
-                new RegisterRequest("Ryan", email, "123456");
+                new RegisterRequest("Ryan", email, "123456", new Coordinates(32.0, 32.0));
 
         mockMvc.perform(post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -88,7 +89,7 @@ class AuthControllerTest {
         String email = uniqueEmail();
 
         RegisterRequest register =
-                new RegisterRequest("Ryan", email, "123456");
+                new RegisterRequest("Ryan", email, "123456", new Coordinates(32.0, 32.0));
 
         mockMvc.perform(post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)

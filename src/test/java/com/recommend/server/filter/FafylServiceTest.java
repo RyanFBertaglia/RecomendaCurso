@@ -1,7 +1,9 @@
 package com.recommend.server.filter;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.recommend.server.dto.Coordinates;
+import com.recommend.server.dto.CourseImpDTO;
 import com.recommend.server.dto.Fafyl;
 import com.recommend.server.dto.Quiz;
 import com.recommend.server.model.Course;
@@ -41,6 +43,9 @@ class FafylServiceTest {
 
     @InjectMocks
     private FafylService fafylService;
+
+    @Mock
+    private ObjectMapper objectMapper;
 
     @Test
     void shouldReturnRankedCoursesBasedOnAbilities() {
@@ -158,28 +163,53 @@ class FafylServiceTest {
     void shouldReturnCoursesWithinDistance() {
 
         List<Integer> ids = List.of(1, 2);
-        Coordinates user = new Coordinates(10.0, 10.0);
+        Coordinates user = new Coordinates(-22.9059, -47.0590);
 
-        CourseImp imp1 = mock(CourseImp.class);
-        CourseImp imp2 = mock(CourseImp.class);
+        CourseImpRepository.CourseImpProjection p1 = mock(CourseImpRepository.CourseImpProjection.class);
+        CourseImpRepository.CourseImpProjection p2 = mock(CourseImpRepository.CourseImpProjection.class);
 
-        List<CourseImp> dbCourses = List.of(imp1, imp2);
+        when(p1.getName()).thenReturn("Curso 1");
+        when(p1.getCourseId()).thenReturn(1);
+        when(p1.getCollegeId()).thenReturn(1);
+        when(p1.getLat()).thenReturn(-22.90);
+        when(p1.getLon()).thenReturn(-47.05);
+        when(p1.getNote()).thenReturn("{}");
+        when(p1.getDetails()).thenReturn("Detalhes");
+        when(p1.getFees()).thenReturn(1000.0);
 
-        when(courseImpRepository.findByCourseIdIn(ids))
-                .thenReturn(dbCourses);
+        when(p2.getName()).thenReturn("Curso 2");
+        when(p2.getCourseId()).thenReturn(2);
+        when(p2.getCollegeId()).thenReturn(2);
+        when(p2.getLat()).thenReturn(-30.00);
+        when(p2.getLon()).thenReturn(-50.00);
+        when(p2.getNote()).thenReturn("{}");
+        when(p2.getDetails()).thenReturn("Detalhes");
+        when(p2.getFees()).thenReturn(2000.0);
 
-        when(location.filterByLocation(dbCourses, 10.0, user))
-                .thenReturn(List.of(imp1));
+        when(courseImpRepository.findNearbyCourses(
+                eq(ids),
+                anyDouble(),
+                anyDouble(),
+                anyDouble()
+        )).thenReturn(List.of(p1, p2));
 
-        List<CourseImp> result =
-                fafylService.findInDistance(ids, 10.0, user);
+        when(location.distance(any(), eq(user)))
+                .thenReturn(5000.0)   // p1 dentro
+                .thenReturn(20000.0); // p2 fora
+
+        List<CourseImpDTO> result =
+                fafylService.findInDistance(ids, 10000.0, user);
 
         assertThat(result).hasSize(1);
+        assertThat(result.get(0).courseId()).isEqualTo(1);
 
-        verify(courseImpRepository).findByCourseIdIn(ids);
-        verify(location).filterByLocation(dbCourses, 10.0, user);
+        verify(courseImpRepository).findNearbyCourses(
+                eq(ids),
+                eq(user.lat()),
+                eq(user.lon()),
+                anyDouble()
+        );
     }
-
     @Test
     void shouldReturnAllCourseImplementationsWhenDistanceNotProvided() {
 
@@ -189,7 +219,7 @@ class FafylServiceTest {
         when(courseImpRepository.findAll())
                 .thenReturn(List.of(imp1, imp2));
 
-        List<CourseImp> result =
+        List<CourseImpDTO> result =
                 fafylService.findInDistance(List.of(1,2));
 
         assertThat(result).hasSize(2);

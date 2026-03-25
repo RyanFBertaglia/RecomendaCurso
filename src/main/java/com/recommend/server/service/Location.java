@@ -22,6 +22,8 @@ public class Location {
                 .filter(course -> course.getLocale() != null)
                 .filter(course -> {
                     Double distance = distance(course.getLocale(), user);
+                    System.out.println("Distância: " + distance);
+                    System.out.println("Max: " + max);
                     return distance <= max;
                 })
                 .toList();
