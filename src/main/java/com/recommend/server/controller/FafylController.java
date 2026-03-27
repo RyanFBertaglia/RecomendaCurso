@@ -1,9 +1,6 @@
 package com.recommend.server.controller;
 
-import com.recommend.server.dto.Coordinates;
-import com.recommend.server.dto.Fafyl;
-import com.recommend.server.dto.Quiz;
-import com.recommend.server.model.Course;
+import com.recommend.server.dto.*;
 import com.recommend.server.model.CourseImp;
 import com.recommend.server.service.AuthService;
 import com.recommend.server.service.FafylService;
@@ -11,13 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
+
 
 
 @RestController
 public class FafylController {
-
 
     @Autowired
     FafylService fafylService;
@@ -28,52 +24,29 @@ public class FafylController {
     @GetMapping("/fafyl")
     public ResponseEntity<List<Fafyl>> findAllFafyl(
             @RequestBody Quiz quiz) {
-
         List<Fafyl> fafyl = fafylService.findAllFafyl(quiz);
         return ResponseEntity.ok(fafyl);
     }
 
-    @GetMapping("/fafyl/courses")
-    public ResponseEntity<List<CourseImp>> findAllCourses(
-            @RequestParam(required = false) Double distance,
-            @RequestBody List<Integer> courses
+    // If the user is passing another address is because he wants to filter by distance (mandatory)
+    @PostMapping("/fafyl/courses")
+    public ResponseEntity<List<CourseImpDTO>> findAllCourses(
+            @RequestBody CoursesRequest coursesRequest
     ) {
-        List<CourseImp> possible;
+        List<CourseImpDTO> possible;
+        if(coursesRequest.location() != null && coursesRequest.distance() != null) {
+            possible =  fafylService.findInDistance(coursesRequest.courses(),
+                    coursesRequest.distance(), coursesRequest.location());
+            return ResponseEntity.ok(possible);
+        }
         Coordinates userLocation = authService.getUser().locale();
-        if(distance != null) {
-            possible =  fafylService.findInDistance(courses, distance, userLocation);
+        if(coursesRequest.distance() != null) {
+            possible =  fafylService.findInDistance(coursesRequest.courses(),
+                    coursesRequest.distance(), userLocation);
             return ResponseEntity.ok(possible);
         }
-        return ResponseEntity.ok(fafylService.findInDistance(courses));
+        return ResponseEntity.ok(fafylService.findWithoutDistance(coursesRequest.courses()));
     }
-    /*
-
-    Envia a lista de cursos de interesse do usuário
-    Busca os cursosimp segundo o filtro
-
-    // /course?distance=3000
-    @GetMapping("/fafyl/courses")
-    public ResponseEntity<List<CourseImp>> findAllCourses(
-            @RequestBody List<Integer> courses,
-            @RequestParam(required = false) Double distance) {
-        if(distance != null) {
-            fafyl = fafylService.findAllFafyl(distance, idCourse);
-            return ResponseEntity.ok(possible);
-        }
-
-        return ResponseEntity.ok(fafylService.findAllCourses());
-    }
-
-    @GetMapping("/fafyl/courses/{id}")
-    public ResponseEntity<CourseImp> findCourseById(@PathVariable Long id) {
-        return ResponseEntity.ok(fafylService.findCourseById(id));
-    }
-
-
-    // /course?distance=3000
-
-*/
-
     /*
         /register
         /login
@@ -84,6 +57,5 @@ public class FafylController {
         /course/{id}
         /model/course
         /model/course/{id}
-
     */
 }

@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.recommend.server.dto.Coordinates;
 import com.recommend.server.dto.UserDTO;
 import jakarta.persistence.*;
-import lombok.*;
-
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data

@@ -212,18 +212,14 @@ class FafylServiceTest {
     }
     @Test
     void shouldReturnAllCourseImplementationsWhenDistanceNotProvided() {
+        CourseImpDTO dto1 = new CourseImpDTO("Curso 1", 1, 10, null, "Detalhes", 1000.0, null);
+        CourseImpDTO dto2 = new CourseImpDTO("Curso 2", 2, 20, null, "Detalhes", 2000.0, null);
 
-        CourseImp imp1 = mock(CourseImp.class);
-        CourseImp imp2 = mock(CourseImp.class);
+        when(courseImpRepository.findAllCourseImpDTO())
+                .thenReturn(List.of(dto1, dto2));
 
-        when(courseImpRepository.findAll())
-                .thenReturn(List.of(imp1, imp2));
-
-        List<CourseImpDTO> result =
-                fafylService.findInDistance(List.of(1,2));
-
+        List<CourseImpDTO> result = fafylService.findWithoutDistance(List.of(1, 2));
         assertThat(result).hasSize(2);
-
-        verify(courseImpRepository).findAll();
+        verify(courseImpRepository).findAllCourseImpDTO();
     }
 }

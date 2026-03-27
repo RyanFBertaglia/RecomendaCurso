@@ -11,7 +11,7 @@ import java.util.List;
 public interface CourseImpRepository extends JpaRepository<CourseImp, Integer> {
     CourseImp findByCourseIdAndCollegeId(Integer courseId, Integer collegeId);
 
-    List<CourseImp> findByCourseIdIn(List<Integer> courses);
+    // List<CourseImp> findByCourseIdIn(List<Integer> courses);
 
     @Query(value = """
             SELECT
@@ -42,13 +42,25 @@ public interface CourseImpRepository extends JpaRepository<CourseImp, Integer> {
             @Param("distance") double distance
     );
 
+    @Query("""
+    SELECT new com.recommend.server.dto.CourseImpDTO(
+        c.name,
+        c.course.id,
+        c.college.id,
+        c.note,
+        c.details,
+        c.fees,
+        c.locale
+    )
+    FROM CourseImp c
+    """)
     List<CourseImpDTO> findAllCourseImpDTO();
 
     interface CourseImpProjection {
         String getName();
         Integer getCourseId();
         Integer getCollegeId();
-        String getNote();      // JSON vem como String na projeção nativa
+        String getNote();      // JSON comes as String with native projection
         String getDetails();
         Double getFees();
         Double getLat();
