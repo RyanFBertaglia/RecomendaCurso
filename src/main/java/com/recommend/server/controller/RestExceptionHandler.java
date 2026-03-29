@@ -1,9 +1,6 @@
 package com.recommend.server.controller;
 
-import com.recommend.server.exception.BadCredentials;
-import com.recommend.server.exception.EmailAlreadyExists;
-import com.recommend.server.exception.LocationNotFound;
-import com.recommend.server.exception.TokenInvalid;
+import com.recommend.server.exception.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -30,5 +27,10 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(TokenInvalid.class)
     private ResponseEntity<String> TokenInvalid(TokenInvalid tokenInvalid) {
         return ResponseEntity.badRequest().body(tokenInvalid.getMessage());
+    }
+
+    @ExceptionHandler(LocationNotProvided.class)
+    private ResponseEntity<String> LocationNotProvided(LocationNotProvided locationNotProvided) {
+        return ResponseEntity.badRequest().body(locationNotProvided.getMessage());
     }
 }

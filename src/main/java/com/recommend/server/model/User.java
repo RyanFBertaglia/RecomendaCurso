@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -28,6 +30,9 @@ public class User {
     @JoinColumn(name = "capelinho_id")
     @JsonManagedReference
     Capelinho capelinho;
+
+    @OneToMany(mappedBy = "user")
+    private List<History> history;
 
     public UserDTO getUserDTO() {
         if (capelinho == null) {

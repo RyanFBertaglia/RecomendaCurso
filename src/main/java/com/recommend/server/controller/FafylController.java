@@ -1,7 +1,6 @@
 package com.recommend.server.controller;
 
 import com.recommend.server.dto.*;
-import com.recommend.server.model.CourseImp;
 import com.recommend.server.service.AuthService;
 import com.recommend.server.service.FafylService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +38,7 @@ public class FafylController {
                     coursesRequest.distance(), coursesRequest.location());
             return ResponseEntity.ok(possible);
         }
-        Coordinates userLocation = authService.getUser().locale();
+        Coordinates userLocation = authService.getUserDTO().locale();
         if(coursesRequest.distance() != null) {
             possible =  fafylService.findInDistance(coursesRequest.courses(),
                     coursesRequest.distance(), userLocation);

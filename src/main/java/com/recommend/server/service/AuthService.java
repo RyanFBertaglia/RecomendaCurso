@@ -3,18 +3,22 @@ package com.recommend.server.service;
 import com.recommend.server.dto.*;
 import com.recommend.server.exception.BadCredentials;
 import com.recommend.server.exception.EmailAlreadyExists;
+import com.recommend.server.exception.LocationNotProvided;
 import com.recommend.server.exception.TokenInvalid;
+import com.recommend.server.model.Course;
+import com.recommend.server.model.History;
 import com.recommend.server.model.User;
+import com.recommend.server.repository.HistoryRepository;
 import com.recommend.server.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -27,6 +31,9 @@ public class AuthService {
 
     @Autowired
     JwtService jwtService;
+
+    @Autowired
+    HistoryRepository historyRepository;
 
     @Autowired
     AuthenticationManager authenticationManager;
@@ -83,7 +90,7 @@ public class AuthService {
         return new AuthResponse(newToken);
     }
 
-    public UserDTO getUser() {
+    public UserDTO getUserDTO() {
         String email = getUserEmail();
         User user = userRepository.findByEmail(email)
                 .orElseThrow();
@@ -91,7 +98,16 @@ public class AuthService {
         return user.getUserDTO();
     }
 
+    public User getUser() {
+        String email = getUserEmail();
+        return userRepository.findByEmail(email)
+                .orElseThrow(BadCredentials::new);
+    }
+
     public String getUserEmail() {
+        if (SecurityContextHolder.getContext().getAuthentication() == null)
+            throw new BadCredentials("User not authenticated");
+
         return (String) Objects.requireNonNull(SecurityContextHolder
                         .getContext()
                         .getAuthentication())
@@ -100,7 +116,34 @@ public class AuthService {
 
     public UserDTO addCoordinates(Coordinates coordinates) {
         String email = getUserEmail();
-        userRepository.updateCoordinates(email, coordinates);
-        return getUser();
+        if (email == null)
+            throw new BadCredentials("User not authenticated");
+        if (coordinates == null)
+            throw new LocationNotProvided("Coordinates not provided");
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow();
+
+        user.setLocale(coordinates);
+
+        userRepository.save(user);
+        return user.getUserDTO();
+    }
+
+    public History addHistory(Course course) {
+        User user = getUser();
+        if (course == null)
+            throw new BadCredentials("Course not provided");
+
+        History history = new History();
+        history.setUser(user);
+        history.setCourse(course);
+        history.setAccessedAt(new Date());
+
+        return historyRepository.save(history);
+    }
+
+    public List<History> getHistory() {
+        return historyRepository.findByUserIdOrderByAccessedAtDesc(getUser().getId());
     }
 }
