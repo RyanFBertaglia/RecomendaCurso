@@ -224,8 +224,8 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("Should return 400 when course id is null")
-    void shouldFailWhenCourseIdIsNull() throws Exception {
+    @DisplayName("Should return 400 when course id is missing")
+    void shouldFailWhenCourseIdIsMissing() throws Exception {
 
         String email = uniqueEmail();
 
@@ -249,9 +249,7 @@ class AuthControllerTest {
         );
 
         mockMvc.perform(post("/auth/history")
-                        .header("Authorization", "Bearer " + token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("null"))
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isBadRequest());
     }
 
@@ -289,8 +287,7 @@ class AuthControllerTest {
 
         mockMvc.perform(post("/auth/history")
                         .header("Authorization", "Bearer " + token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(courseId)))
+                        .param("idCourse", courseId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.course").exists());

@@ -48,7 +48,7 @@ public class AuthController {
     }
 
     @PostMapping("/history")
-    public ResponseEntity<History> addHistory(@RequestBody Integer idCourse) {
+    public ResponseEntity<History> addHistory(@RequestParam Integer idCourse) {
         if (idCourse == null) return ResponseEntity.badRequest().build();
         Course course = dataService.findOneCourse(idCourse);
         return ResponseEntity.ok().body(authService.addHistory(course));
