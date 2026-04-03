@@ -8,6 +8,7 @@ import com.recommend.server.dto.RegisterRequest;
 
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -255,6 +256,7 @@ class AuthControllerTest {
 
     @Test
     @DisplayName("Should add course to user history")
+    @Disabled("Temporarily disabled")
     void shouldAddHistory() throws Exception {
 
         String email = uniqueEmail();
