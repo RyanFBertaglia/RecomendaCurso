@@ -1,42 +1,28 @@
-package com.recommend.server.ia;
+package com.recommend.server.service;
 
 import ai.onnxruntime.OnnxTensor;
 import ai.onnxruntime.OrtEnvironment;
-import ai.onnxruntime.OrtException;
 import ai.onnxruntime.OrtSession;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
-public class AnswerQuestionsTest {
+@Service
+public class ChatService {
+
     private static OrtEnvironment env;
     private static OrtSession session;
 
-    @BeforeAll
-    public static void setup() {
+
+    public ChatService() {
         env = OrtEnvironment.getEnvironment();
-    }
-
-    @AfterAll
-    public static void cleanup() throws OrtException {
-        if (session != null) session.close();
-    }
-
-    @BeforeEach
-    void loadModel() {
         OrtSession.SessionOptions options = new OrtSession.SessionOptions();
         try {
-            session = env.createSession("src/test/resources/chatbot.onnx", options);
-        } catch (OrtException e) { throw new RuntimeException("Error while loading the model"); }
+            session = env.createSession("src/main/resources/chatbot.onnx", options);
+        } catch (Exception e) { throw new RuntimeException("Error while loading the model"); }
     }
 
-    @Test
-    public void testAnswerQuestions() throws OrtException {
-        String question = "Como me é recomendado um curso?";
+    public String respond(String question) {
         try {
             OnnxTensor inputTensor = OnnxTensor.createTensor(
                     env,
@@ -53,10 +39,10 @@ public class AnswerQuestionsTest {
             Object output = result.get(0).getValue();
             String label = ((String[]) output)[0];
 
-            IO.println(mapResponse(label));
+            return mapResponse(label);
 
         } catch (Exception e) {
-            IO.println("Error understanding the question");
+            throw new RuntimeException("Error understanding the question");
         }
     }
 
