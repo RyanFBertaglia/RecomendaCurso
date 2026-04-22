@@ -1,23 +1,40 @@
 package com.recommend.server.location;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.recommend.server.dto.Coordinates;
-import com.recommend.server.exception.LocationNotFound;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.Assumptions;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SpringBootTest
 public class CepToCoordinatesTest {
 
     @Test
     void getApproximated() {
-        // As a difference of 1/2 streets doesn't make any difference
-        // change a little the cep is not so bad
-        RestTemplate restTemplate = new RestTemplate();
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(5000);
+        factory.setReadTimeout(5000);
+
+        RestTemplate restTemplate = new RestTemplate(factory);
+
+        // Verifica se a API está no ar com um CEP garantido
+        boolean apiAvailable = true;
+        try {
+            String testJson = restTemplate.getForObject(
+                    "https://brasilapi.com.br/api/cep/v2/01001000",
+                    String.class
+            );
+            if (testJson == null || !testJson.contains("latitude")) {
+                apiAvailable = false;
+            }
+        } catch (Exception e) {
+            apiAvailable = false;
+        }
+
+        Assumptions.assumeTrue(apiAvailable, "API BrasilAPI is unavailable");
+
+        // Testa o CEP base + offsets (fallback)
         Coordinates coordinates = null;
         int cepBase = 13060471;
         int[] offsets = {0, 1, -1, 2, -2, 3, -3};
@@ -40,7 +57,8 @@ public class CepToCoordinatesTest {
 
             } catch (Exception ignored) {}
         }
-        assertNotNull(coordinates, "It should give an approximated location");
+
+        assertNotNull(coordinates, "Fallback should return the nearest CEP when base CEP is not found");
         System.out.println(coordinates);
     }
 }
