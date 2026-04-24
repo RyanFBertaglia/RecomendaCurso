@@ -11,7 +11,11 @@ import com.recommend.server.model.User;
 import com.recommend.server.repository.HistoryRepository;
 import com.recommend.server.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,6 +42,7 @@ public class AuthService {
     @Autowired
     AuthenticationManager authenticationManager;
 
+    @Transactional
     public AuthResponse register(RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.email()))
@@ -57,6 +62,7 @@ public class AuthService {
         return new AuthResponse(token);
     }
 
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(BadCredentials::new);
@@ -114,6 +120,7 @@ public class AuthService {
                 .getPrincipal();
     }
 
+    @Transactional
     public UserDTO addCoordinates(Coordinates coordinates) {
         String email = getUserEmail();
         if (email == null)
@@ -130,6 +137,8 @@ public class AuthService {
         return user.getUserDTO();
     }
 
+    @Transactional
+    @Async
     public History addHistory(Course course) {
         User user = getUser();
         if (course == null)
@@ -145,5 +154,9 @@ public class AuthService {
 
     public List<History> getHistory() {
         return historyRepository.findByUserIdOrderByAccessedAtDesc(getUser().getId());
+    }
+
+    public Page<History> getHistoryPage(Pageable pageable) {
+        return historyRepository.findByUserId(getUser().getId(), pageable);
     }
 }

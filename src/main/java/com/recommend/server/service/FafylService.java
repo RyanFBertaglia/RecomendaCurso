@@ -10,6 +10,11 @@ import com.recommend.server.model.Course;
 import com.recommend.server.repository.CourseImpRepository;
 import com.recommend.server.repository.CourseRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -35,13 +40,28 @@ public class FafylService {
 
     @Transactional
     public List<Fafyl> findAllFafyl(Quiz quiz) {
+        return findAllFafyl(quiz, PageRequest.of(0, Integer.MAX_VALUE)).getContent();
+    }
+
+    @Transactional
+    @Async
+    public Page<Fafyl> findAllFafyl(Quiz quiz, Pageable pageable) {
         try (Stream<Course> stream = courseRepository.streamAll()) {
-            return stream
+            List<Fafyl> all = stream
                     .filter(course -> course.getAbilities().stream().noneMatch(quiz.getUserCantBe()::contains))
                     .map(curso -> new Fafyl(curso.compare(quiz.getAbilities()), curso))
                     .filter(resp -> resp.incidence() > 0)
                     .sorted(Comparator.comparingInt(Fafyl::incidence).reversed())
                     .toList();
+
+            int start = (int) pageable.getOffset();
+            int end = Math.min(start + pageable.getPageSize(), all.size());
+
+            if (start >= all.size()) {
+                return new PageImpl<>(List.of(), pageable, all.size());
+            }
+
+            return new PageImpl<>(all.subList(start, end), pageable, all.size());
 
         } catch (Exception e) {
             throw new RuntimeException(e);

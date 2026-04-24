@@ -7,6 +7,9 @@ import com.recommend.server.model.College;
 import com.recommend.server.model.Course;
 import com.recommend.server.model.CourseImp;
 import com.recommend.server.service.DataService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +26,13 @@ public class DataController {
     }
 
     @GetMapping("/model/course")
-    public ResponseEntity<List<Course>> findAll() {
-        return ResponseEntity.ok(dataService.findAllModelCourses());
+    public ResponseEntity<Page<Course>> findAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        return ResponseEntity.ok(dataService.findAllModelCourses(PageRequest.of(page, size, sort)));
     }
 
     @PostMapping("/model/course")
@@ -33,8 +41,13 @@ public class DataController {
     }
 
     @GetMapping("/course")
-    public ResponseEntity<List<CourseImp>> findAllCourses() {
-        return ResponseEntity.ok(dataService.findAllCourses());
+    public ResponseEntity<Page<CourseImp>> findAllCourses(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        return ResponseEntity.ok(dataService.findAllCourses(PageRequest.of(page, size, sort)));
     }
 
     @PostMapping("/course")
@@ -43,8 +56,13 @@ public class DataController {
     }
 
     @GetMapping("/college")
-    public ResponseEntity<List<College>> findAllColleges() {
-        return ResponseEntity.ok(dataService.findAllColleges());
+    public ResponseEntity<Page<College>> findAllColleges(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        return ResponseEntity.ok(dataService.findAllColleges(PageRequest.of(page, size, sort)));
     }
 
     @PostMapping(value = "/college")

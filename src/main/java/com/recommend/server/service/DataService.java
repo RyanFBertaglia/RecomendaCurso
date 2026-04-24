@@ -12,6 +12,9 @@ import com.recommend.server.repository.CourseRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,7 +44,7 @@ public class DataService {
         this.courseImpRepository = courseImpRepository;
     }
 
-    public List<Course> insertCourses(List<CourseDTO> courseList) {
+public List<Course> insertCourses(List<CourseDTO> courseList) {
         List<Course> courses = courseList.stream()
                 .map(dto -> {
                     Course course = new Course();
@@ -56,6 +59,7 @@ public class DataService {
         return courseRepository.saveAll(courses);
     }
 
+    @Transactional
     public List<CourseImp> insertCoursesImp(List<CourseImpDTO> courseImpDTOList) {
         List<CourseImp> courses = courseImpDTOList.stream()
                 .map(dto -> {
@@ -65,7 +69,7 @@ public class DataService {
                     courseImp.setDetails(dto.details());
                     courseImp.setFees(dto.fees());
                     courseImp.setLocale(dto.locale());
-
+ 
                     Course course = courseRepository.findById(dto.courseId())
                             .orElseThrow(() -> new RuntimeException("Course not found: " + dto.courseId()));
                     College college = collegeRepository.findById(dto.collegeId())
@@ -78,6 +82,8 @@ public class DataService {
         return courseImpRepository.saveAll(courses);
     }
 
+    @Transactional
+    @Async
     public List<College> insertColleges(List<CollegeDTO> colleges) {
         return colleges.stream().map(collegeDTO -> {
             College college = new College();
@@ -127,6 +133,8 @@ public class DataService {
         return courseImpRepository.save(courseImp);
     }
 
+    @Transactional
+    @Async
     public String saveImage(MultipartFile file) {
         try {
             String original = Objects.requireNonNull(file.getOriginalFilename());
@@ -162,8 +170,15 @@ public class DataService {
     public List<Course> findAllModelCourses() {
         return courseRepository.findAll();
     }
+
+    public Page<Course> findAllModelCourses(Pageable pageable) {
+        return courseRepository.findAll(pageable);
+    }
+
     public List<College> findAllColleges() { return collegeRepository.findAll(); }
+    public Page<College> findAllColleges(Pageable pageable) { return collegeRepository.findAll(pageable); }
     public List<CourseImp> findAllCourses() { return courseImpRepository.findAll(); }
+    public Page<CourseImp> findAllCourses(Pageable pageable) { return courseImpRepository.findAll(pageable); }
     public College findOneCollege(Integer id) { return collegeRepository.findById(id).orElse(null); }
     public CourseImp findOneCourseImp(Integer id) { return courseImpRepository.findById(id).orElse(null); }
     public Course findOneCourse(Integer id) { return courseRepository.findById(id).orElse(null); }
