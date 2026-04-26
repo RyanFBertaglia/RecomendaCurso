@@ -6,7 +6,11 @@ import com.recommend.server.model.History;
 import com.recommend.server.service.AuthService;
 import com.recommend.server.service.DataService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,12 +27,12 @@ public class AuthController {
     DataService dataService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         return new ResponseEntity<>(authService.register(request),HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody LoginRequest request) {
+    public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
     }
 
@@ -57,5 +61,15 @@ public class AuthController {
     @GetMapping("/history")
     public ResponseEntity<List<History>> getHistory() {
         return ResponseEntity.ok(authService.getHistory());
+    }
+
+    @GetMapping("/history/page")
+    public ResponseEntity<Page<History>> getHistoryPage(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "accessedAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        return ResponseEntity.ok(authService.getHistoryPage(PageRequest.of(page, size, sort)));
     }
 }
