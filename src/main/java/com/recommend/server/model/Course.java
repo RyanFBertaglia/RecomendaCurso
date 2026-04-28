@@ -20,6 +20,9 @@ public class Course {
     private List<String> cantBe;
     private String description;
 
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CourseImp> courseImps;
+
     public int compare(List<String> abilities) {
         return (int) abilities.stream()
                 .filter(this.abilities::contains)

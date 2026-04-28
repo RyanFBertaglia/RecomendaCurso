@@ -94,4 +94,10 @@ public class DataController {
     public ResponseEntity<CourseImp> findCourseByCollegeIdAndCourseId(@PathVariable Integer id, @PathVariable Integer courseId) {
         return ResponseEntity.ok(dataService.findOneCourseImpByCourseIdAndCollegeId(courseId, id));
     }
+
+    @DeleteMapping("/clean")
+    public ResponseEntity<?> clean() {
+        dataService.clean();
+        return ResponseEntity.ok().build();
+    }
 }

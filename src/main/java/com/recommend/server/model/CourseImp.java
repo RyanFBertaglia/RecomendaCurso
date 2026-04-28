@@ -21,7 +21,7 @@ public class CourseImp {
 
     private String name;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_course", nullable = false)
     private Course course;
 

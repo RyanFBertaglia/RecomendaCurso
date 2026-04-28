@@ -171,6 +171,12 @@ public List<Course> insertCourses(List<CourseDTO> courseList) {
         return courseRepository.findAll();
     }
 
+    public void clean() {
+        courseRepository.deleteAll();
+        collegeRepository.deleteAll();
+        courseImpRepository.deleteAll();
+    }
+
     public Page<Course> findAllModelCourses(Pageable pageable) {
         return courseRepository.findAll(pageable);
     }
