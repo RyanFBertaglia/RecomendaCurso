@@ -176,7 +176,6 @@ class AuthControllerTest {
                 "$.token"
         );
 
-        // 🔥 CORREÇÃO PRINCIPAL: simular autenticação no contexto
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(email, null, null);
 

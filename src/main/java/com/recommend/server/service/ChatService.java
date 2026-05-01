@@ -5,6 +5,9 @@ import ai.onnxruntime.OrtEnvironment;
 import ai.onnxruntime.OrtSession;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.Collections;
 
 @Service
@@ -18,8 +21,16 @@ public class ChatService {
         env = OrtEnvironment.getEnvironment();
         OrtSession.SessionOptions options = new OrtSession.SessionOptions();
         try {
-            session = env.createSession("src/main/resources/chatbot.onnx", options);
-        } catch (Exception e) { throw new RuntimeException("Error while loading the model"); }
+            InputStream modelStream = getClass().getResourceAsStream("/chatbot.onnx");
+            File tempModel = File.createTempFile("chatbot", ".onnx");
+            tempModel.deleteOnExit();
+            try (FileOutputStream out = new FileOutputStream(tempModel)) {
+                modelStream.transferTo(out);
+            }
+            session = env.createSession(tempModel.getAbsolutePath(), options);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while loading the model");
+        }
     }
 
     public String respond(String question) {

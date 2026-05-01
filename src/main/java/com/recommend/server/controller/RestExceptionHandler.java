@@ -1,6 +1,7 @@
 package com.recommend.server.controller;
 
 import com.recommend.server.exception.*;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -43,5 +44,10 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(LocationNotProvided.class)
     private ResponseEntity<String> LocationNotProvided(LocationNotProvided locationNotProvided) {
         return ResponseEntity.badRequest().body(locationNotProvided.getMessage());
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    private ResponseEntity<String> ExpiredJwt(ExpiredJwtException ex) {
+        return ResponseEntity.status(401).body("Token expired");
     }
 }
