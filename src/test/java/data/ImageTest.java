@@ -6,25 +6,24 @@ import com.recommend.server.model.College;
 import com.recommend.server.repository.CollegeRepository;
 import com.recommend.server.repository.CourseRepository;
 import com.recommend.server.service.DataService;
+import com.recommend.server.service.ImageStorageService;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.util.ReflectionTestUtils;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,20 +37,14 @@ class ImageTest {
     @Mock
     private CourseRepository courseRepository;
 
+    @Mock
+    private ImageStorageService imageStorageService;
+
     @InjectMocks
     private DataService collegeService;
 
-    @TempDir
-    Path tempDir;
-
-    private static final Pattern FILENAME_PATTERN =
-            Pattern.compile("^/storage/[a-f0-9]{8}\\.[a-zA-Z0-9]+$");
-
-    @BeforeEach
-    void setUp() {
-        String path = tempDir.toAbsolutePath().toString();
-        ReflectionTestUtils.setField(collegeService, "IMG_DIR", path);
-    }
+    private static final Pattern OBJECT_ID_PATTERN =
+            Pattern.compile("^[a-f0-9]{24}$");
 
     private MockMultipartFile mockImage(String originalName) {
         return new MockMultipartFile(
@@ -69,53 +62,26 @@ class ImageTest {
         );
     }
 
+    @BeforeEach
+    void setUp() {
+        lenient().when(imageStorageService.saveImage(any())).thenAnswer(invocation -> {
+            return new ObjectId().toHexString();
+        });
+    }
+
     @Test
-    @DisplayName("saveImage — should preserve .jpg extension")
-    void saveImage_devePreservarExtensaoJpg() {
+    @DisplayName("saveImage — should return valid ObjectId hex")
+    void saveImage_deveRetornarObjectIdHex() {
         String result = collegeService.saveImage(mockImage("foto.jpg"));
-        assertThat(result).endsWith(".jpg");
+        assertThat(result).matches(OBJECT_ID_PATTERN);
     }
 
     @Test
-    @DisplayName("saveImage — should preserve .png extension")
-    void saveImage_devePreservarExtensaoPng() {
-        String result = collegeService.saveImage(mockImage("logo.png"));
-        assertThat(result).endsWith(".png");
-    }
-
-    @Test
-    @DisplayName("saveImage — should preserve .webp extension")
-    void saveImage_devePreservarExtensaoWebp() {
-        String result = collegeService.saveImage(mockImage("banner.webp"));
-        assertThat(result).endsWith(".webp");
-    }
-
-    @Test
-    @DisplayName("saveImage — should generate unique names for the same file")
-    void saveImage_deveGerarNomesUnicos() {
+    @DisplayName("saveImage — should generate unique ObjectIds for same file")
+    void saveImage_deveGerarIdsUnicos() {
         String first  = collegeService.saveImage(mockImage("img.jpg"));
         String second = collegeService.saveImage(mockImage("img.jpg"));
         assertThat(first).isNotEqualTo(second);
-    }
-
-    @Test
-    @DisplayName("saveImage — should create file on disk with generated name")
-    void saveImage_deveCriarArquivoEmDisco() {
-        String filename = collegeService.saveImage(mockImage("foto.jpg"));
-        String cleanName = filename.replace("/storage/", "");
-        assertThat(tempDir.resolve(cleanName)).exists();
-    }
-
-    @Test
-    @DisplayName("saveImage — saved file content should match original")
-    void saveImage_devePreservarConteudoDoArquivo() throws Exception {
-        byte[] content = "real-content".getBytes();
-        MockMultipartFile file = new MockMultipartFile(
-                "image", "foto.jpg", MediaType.IMAGE_JPEG_VALUE, content
-        );
-        String filename = collegeService.saveImage(file);
-        String cleanName = filename.replace("/storage/", "");
-        assertThat(Files.readAllBytes(tempDir.resolve(cleanName))).isEqualTo(content);
     }
 
     @Test
@@ -141,13 +107,13 @@ class ImageTest {
     }
 
     @Test
-    @DisplayName("insertColleges — image should follow format {8hex}.ext with prefix")
-    void insertColleges_comImagem_imageDeveSegueFormato() {
+    @DisplayName("insertColleges — image should be a valid ObjectId hex")
+    void insertColleges_comImagem_imageDeveSerObjectId() {
         when(collegeRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         List<College> result = collegeService.insertColleges(
                 List.of(buildDTO(mockImage("foto.jpg")))
         );
-        assertThat(result.getFirst().getImage()).matches(FILENAME_PATTERN);
+        assertThat(result.getFirst().getImage()).matches(OBJECT_ID_PATTERN);
     }
 
     @Test
@@ -182,5 +148,13 @@ class ImageTest {
 
         List<College> result = collegeService.insertColleges(List.of(dto1, dto2));
         assertThat(result).extracting(College::getName).containsExactly("A", "B");
+    }
+
+    @Test
+    @DisplayName("saveImage — should delegate to ImageStorageService")
+    void saveImage_deveDelegarParaImageStorageService() {
+        MockMultipartFile file = mockImage("foto.jpg");
+        collegeService.saveImage(file);
+        verify(imageStorageService, times(1)).saveImage(file);
     }
 }
