@@ -16,7 +16,7 @@ import org.bson.Document;
 @TestPropertySource(value = "classpath:application.properties")
 public class MongoDBTest {
 
-    @Value(value = "${mongodb.uri}")
+    @Value(value = "${mongodb.atlas.uri}")
     String uri;
 
     @Test
