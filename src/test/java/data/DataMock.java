@@ -1,6 +1,7 @@
 package data;
 
 import com.recommend.server.dto.Coordinates;
+import com.recommend.server.model.College;
 import com.recommend.server.model.Course;
 import com.recommend.server.model.CourseImp;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @Component
 public class DataMock {
+
     public static List<Course> listCourses() {
         List<Course> courses = new ArrayList<>();
 
@@ -27,38 +29,42 @@ public class DataMock {
         return courses;
     }
 
+    public static College defaultCollege() {
+        College college = new College();
+        college.setName("Universidade Campinas");
+        college.setDescription("Universidade pública de referência");
+        college.setLocale(new Coordinates(-22.905, -47.060));
+        return college;
+    }
+
     public static List<CourseImp> courseImpsList() {
-        List<CourseImp> courses = new ArrayList<>();
+        List<Course> courses = listCourses();
+        College college = defaultCollege();
+        List<CourseImp> courseImps = new ArrayList<>();
 
-        // 649m
-        courses.add(create(1, "Logística", 201, 10, 800.0, -22.905, -47.060, "Próximo à estação rodoviária"));
-        // 13222m
-        courses.add(create(2, "Engenharia de Computação", 202, 11, 2500.0, -22.816, -47.069, "Foco em hardware e software"));
-        // 29257m
-        courses.add(create(3, "Análise de Sistemas", 203, 12, 950.0, -23.088, -47.218, "Unidade Indaiatuba - Noturno"));
-        // 29047m
-        courses.add(create(4, "Administração", 204, 13, 700.0, -22.820, -47.266, "Foco em gestão industrial"));
-        // 10197m
-        courses.add(create(5, "Marketing Digital", 205, 14, 1100.0, -22.970, -46.996, "Unidade Valinhos - Semipresencial"));
+        courseImps.add(createCourseImp(1, "Logística", courses.get(4), college, 800.0, -22.905, -47.060, "Próximo à estação rodoviária"));
+        courseImps.add(createCourseImp(2, "Engenharia de Computação", courses.get(3), college, 2500.0, -22.816, -47.069, "Foco em hardware e software"));
+        courseImps.add(createCourseImp(3, "Análise de Sistemas", courses.get(3), college, 950.0, -23.088, -47.218, "Unidade Indaiatuba - Noturno"));
+        courseImps.add(createCourseImp(4, "Administração", courses.get(1), college, 700.0, -22.820, -47.266, "Foco em gestão industrial"));
+        courseImps.add(createCourseImp(5, "Marketing Digital", courses.get(5), college, 1100.0, -22.970, -46.996, "Unidade Valinhos - Semipresencial"));
 
-        return courses;
+        return courseImps;
     }
 
-    public static CourseImp create(Integer id, String name, Integer idCourse, Integer idCollege,
-                                   Double fees, Double lat, Double lon, String details) {
-        CourseImp course = new CourseImp();
-        course.setId(id);
-        course.setName(name);
-        course.setCourse(null);
-        course.setCollege(null);
-        course.setFees(fees);
-        course.setDetails(details);
-        course.setLocale(new Coordinates(lat, lon));
-        course.setNote(null);
-        return course;
+    private static CourseImp createCourseImp(Integer id, String name, Course course, College college,
+                                             Double fees, Double lat, Double lon, String details) {
+        CourseImp courseImp = new CourseImp();
+        courseImp.setId(id);
+        courseImp.setName(name);
+        courseImp.setCourse(course);
+        courseImp.setCollege(college);
+        courseImp.setFees(fees);
+        courseImp.setDetails(details);
+        courseImp.setLocale(new Coordinates(lat, lon));
+        courseImp.setNote(null);
+        return courseImp;
     }
 
-    // User lives downtown
     public static Coordinates defaultUser() {
         return new Coordinates(-22.9059, -47.0590);
     }
