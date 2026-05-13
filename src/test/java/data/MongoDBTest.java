@@ -13,7 +13,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.bson.Document;
 
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(value = "classpath:application.properties")
 public class MongoDBTest {
 
     @Value(value = "${mongodb.atlas.uri}")
