@@ -7,12 +7,13 @@ import com.mongodb.client.MongoDatabase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import org.bson.Document;
 
-@ExtendWith(SpringExtension.class)
+@SpringBootTest
 public class MongoDBTest {
 
     @Value(value = "${mongodb.atlas.uri}")
