@@ -1,6 +1,7 @@
 package com.recommend.server.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.recommend.server.dto.Coordinates;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -21,13 +22,14 @@ public class CourseImp {
 
     private String name;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "id_course", nullable = false)
+    @JsonManagedReference("course-courseImps")
     private Course course;
 
     @ManyToOne
     @JoinColumn(name = "id_college", nullable = false)
-    @JsonBackReference
+    @JsonBackReference("college-courses")
     private College college;
 
     @JdbcTypeCode(SqlTypes.JSON)

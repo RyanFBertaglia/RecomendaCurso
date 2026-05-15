@@ -21,7 +21,7 @@ public class College {
     private String name;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "college")
-    @JsonManagedReference
+    @JsonManagedReference("college-courses")
     private List<CourseImp> courses;
     private Coordinates locale;
     private String description;
