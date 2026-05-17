@@ -72,4 +72,9 @@ public class AuthController {
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         return ResponseEntity.ok(authService.getHistoryPage(PageRequest.of(page, size, sort)));
     }
+
+    @PutMapping("/capelinho/{capelinhoId}")
+    public ResponseEntity<UserDTO> updateCapelinho(@PathVariable Integer capelinhoId) {
+        return ResponseEntity.ok(authService.updateCapelinho(capelinhoId));
+    }
 }
