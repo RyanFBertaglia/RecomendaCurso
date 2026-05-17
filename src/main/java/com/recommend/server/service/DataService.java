@@ -9,7 +9,10 @@ import com.recommend.server.model.CourseImp;
 import com.recommend.server.repository.CollegeRepository;
 import com.recommend.server.repository.CourseImpRepository;
 import com.recommend.server.repository.CourseRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import com.recommend.server.exception.CollegeNotFound;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +28,9 @@ public class DataService {
     private final CollegeRepository collegeRepository;
     private final CourseImpRepository courseImpRepository;
     private final ImageStorageService imageStorageService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Autowired
     public DataService(CourseRepository courseRepository, CollegeRepository collegeRepository,
@@ -131,7 +137,7 @@ public class DataService {
     @Transactional
     public College updateCollegeImage(Integer collegeId, MultipartFile imageFile) {
         College college = collegeRepository.findById(collegeId)
-                .orElseThrow(() -> new RuntimeException("College not found with ID: " + collegeId));
+                .orElseThrow(() -> new CollegeNotFound("College not found with ID: " + collegeId));
 
         if (imageFile != null && !imageFile.isEmpty()) {
             String imageId = saveImage(imageFile);
@@ -146,10 +152,20 @@ public class DataService {
         return courseRepository.findAll();
     }
 
+    @Transactional
     public void clean() {
-        courseImpRepository.deleteAll();
-        courseRepository.deleteAll();
-        collegeRepository.deleteAll();
+        courseImpRepository.deleteAllInBatch();
+        entityManager.flush();
+        entityManager.clear();
+        courseRepository.deleteAllInBatch();
+        entityManager.flush();
+        entityManager.clear();
+        collegeRepository.deleteAllInBatch();
+        entityManager.flush();
+        entityManager.clear();
+        entityManager.createNativeQuery("ALTER TABLE course ALTER COLUMN id RESTART WITH 1").executeUpdate();
+        entityManager.createNativeQuery("ALTER TABLE college ALTER COLUMN id RESTART WITH 1").executeUpdate();
+        entityManager.createNativeQuery("ALTER TABLE course_imp ALTER COLUMN id RESTART WITH 1").executeUpdate();
         imageStorageService.deleteAll();
     }
 
