@@ -1,16 +1,16 @@
 package com.recommend.server.dto;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
 public class Quiz {
-    @NotEmpty(message = "Abilities cannot be empty")
-    private List<String> abilities;
-    private List<String> userCantBe;
+    @NotNull(message = "Disc profile cannot be null")
+    @NotEmpty(message = "Disc profile cannot be empty")
+    private Map<Character, Double> discProfile;
 }

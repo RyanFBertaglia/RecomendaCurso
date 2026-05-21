@@ -1,6 +1,6 @@
 package com.recommend.server.dto;
 
-import java.util.List;
+import java.util.Map;
 
-public record CourseDTO(String name, List<String> abilities, List<String> cantBe, String description) {
+public record CourseDTO(String name, Map<Character, Double> discWeights, String description) {
 }
