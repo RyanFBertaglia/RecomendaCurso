@@ -5,8 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Entity
@@ -17,21 +20,29 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String name;
-    private List<String> abilities;
-    private List<String> cantBe;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "disc_weights", columnDefinition = "json")
+    private Map<Character, Double> discWeights;
+
     private String description;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference("course-courseImps")
     private List<CourseImp> courseImps;
 
-    public int compare(List<String> abilities) {
-        return (int) abilities.stream()
-                .filter(this.abilities::contains)
-                .count();
+    public double dotProduct(Map<Character, Double> profile) {
+        if (discWeights == null) return 0.0;
+        double score = 0.0;
+        for (Map.Entry<Character, Double> entry : discWeights.entrySet()) {
+            double profileValue = profile.getOrDefault(entry.getKey(), 0.0);
+            score += entry.getValue() * profileValue;
+        }
+        return score;
     }
-    public Course(String name, List<String> abilities) {
+
+    public Course(String name, Map<Character, Double> discWeights) {
         this.name = name;
-        this.abilities = abilities;
+        this.discWeights = discWeights;
     }
 }
