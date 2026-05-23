@@ -1,13 +1,11 @@
 package com.recommend.server.filter;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.recommend.server.dto.Coordinates;
 import com.recommend.server.dto.CourseImpDTO;
 import com.recommend.server.dto.Fafyl;
 import com.recommend.server.dto.Quiz;
 import com.recommend.server.model.Course;
-import com.recommend.server.model.CourseImp;
 import com.recommend.server.repository.CourseImpRepository;
 import com.recommend.server.repository.CourseRepository;
 import com.recommend.server.service.FafylService;
@@ -15,15 +13,12 @@ import com.recommend.server.service.Location;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -48,46 +43,28 @@ class FafylServiceTest {
     private ObjectMapper objectMapper;
 
     @Test
-    void shouldReturnRankedCoursesBasedOnAbilities() {
+    void shouldReturnRankedCoursesBasedOnDiscProfile() {
+        Course c1 = buildCourse("Direito", 1.0, 0.5, 0.8, 0.2);
+        Course c2 = buildCourse("Medicina", 0.8, 0.2, 1.0, 0.5);
+        Course c3 = buildCourse("Engenharia", 0.5, 1.0, 0.2, 0.8);
 
-        Course c1 = mock(Course.class);
-        Course c2 = mock(Course.class);
-        Course c3 = mock(Course.class);
-
-        when(c1.getAbilities()).thenReturn(List.of("Empatia", "Memorização"));
-        when(c2.getAbilities()).thenReturn(List.of("Matemática"));
-        when(c3.getAbilities()).thenReturn(List.of("Organização"));
-
-        when(c1.compare(any())).thenReturn(2);
-        when(c2.compare(any())).thenReturn(1);
-        when(c3.compare(any())).thenReturn(0);
-
-        Quiz quiz = new Quiz(
-                List.of("Empatia", "Memorização"),
-                List.of()
-        );
+        Quiz quiz = new Quiz(Map.of('D', 1.0, 'I', 0.0, 'S', 0.0, 'C', 0.0));
 
         when(courseRepository.streamAll())
                 .thenReturn(Stream.of(c1, c2, c3));
 
         List<Fafyl> result = fafylService.findAllFafyl(quiz);
 
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).incidence()).isEqualTo(2);
-        assertThat(result.get(1).incidence()).isEqualTo(1);
+        assertThat(result).hasSize(3);
+        assertThat(result.get(0).course().getName()).isEqualTo("Direito");
+        assertThat(result.get(0).score()).isGreaterThan(result.get(1).score());
     }
 
     @Test
-    void shouldFilterCoursesBasedOnCantBe() {
+    void shouldRemoveCoursesWithZeroScore() {
+        Course c1 = buildCourse("Zero", 0.0, 0.0, 0.0, 0.0);
 
-        Course c1 = mock(Course.class);
-
-        when(c1.getAbilities()).thenReturn(List.of("Empatia"));
-
-        Quiz quiz = new Quiz(
-                List.of("Empatia"),
-                List.of("Empatia")
-        );
+        Quiz quiz = new Quiz(Map.of('D', 1.0, 'I', 0.0, 'S', 0.0, 'C', 0.0));
 
         when(courseRepository.streamAll())
                 .thenReturn(Stream.of(c1));
@@ -98,59 +75,24 @@ class FafylServiceTest {
     }
 
     @Test
-    void shouldRemoveCoursesWithZeroIncidence() {
+    void shouldSortCoursesByScoreDescending() {
+        Course c1 = buildCourse("Alto D", 1.0, 0.0, 0.0, 0.0);
+        Course c2 = buildCourse("Baixo D", 0.3, 0.0, 0.0, 0.0);
 
-        Course c1 = mock(Course.class);
-
-        when(c1.getAbilities()).thenReturn(List.of("Empatia"));
-        when(c1.compare(any())).thenReturn(0);
-
-        Quiz quiz = new Quiz(
-                List.of("Empatia"),
-                List.of()
-        );
-
-        when(courseRepository.streamAll())
-                .thenReturn(Stream.of(c1));
-
-        List<Fafyl> result = fafylService.findAllFafyl(quiz);
-
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    void shouldSortCoursesByIncidenceDescending() {
-
-        Course c1 = mock(Course.class);
-        Course c2 = mock(Course.class);
-
-        when(c1.getAbilities()).thenReturn(List.of("Empatia"));
-        when(c2.getAbilities()).thenReturn(List.of("Memorização"));
-
-        when(c1.compare(any())).thenReturn(2);
-        when(c2.compare(any())).thenReturn(1);
-
-        Quiz quiz = new Quiz(
-                List.of("Empatia", "Memorização"),
-                List.of()
-        );
+        Quiz quiz = new Quiz(Map.of('D', 1.0, 'I', 0.0, 'S', 0.0, 'C', 0.0));
 
         when(courseRepository.streamAll())
                 .thenReturn(Stream.of(c2, c1));
 
         List<Fafyl> result = fafylService.findAllFafyl(quiz);
 
-        assertThat(result.get(0).incidence())
-                .isGreaterThan(result.get(1).incidence());
+        assertThat(result.get(0).score())
+                .isGreaterThan(result.get(1).score());
     }
 
     @Test
     void shouldThrowRuntimeExceptionWhenRepositoryFails() {
-
-        Quiz quiz = new Quiz(
-                List.of("Empatia"),
-                List.of()
-        );
+        Quiz quiz = new Quiz(Map.of('D', 1.0, 'I', 0.0, 'S', 0.0, 'C', 0.0));
 
         when(courseRepository.streamAll())
                 .thenThrow(new RuntimeException("db error"));
@@ -161,7 +103,6 @@ class FafylServiceTest {
 
     @Test
     void shouldReturnCoursesWithinDistance() {
-
         List<Integer> ids = List.of(1, 2);
         Coordinates user = new Coordinates(-22.9059, -47.0590);
 
@@ -194,8 +135,8 @@ class FafylServiceTest {
         )).thenReturn(List.of(p1, p2));
 
         when(location.distance(any(), eq(user)))
-                .thenReturn(5000.0)   // p1 dentro
-                .thenReturn(20000.0); // p2 fora
+                .thenReturn(5000.0)
+                .thenReturn(20000.0);
 
         List<CourseImpDTO> result =
                 fafylService.findInDistance(ids, 10000.0, user);
@@ -210,6 +151,7 @@ class FafylServiceTest {
                 anyDouble()
         );
     }
+
     @Test
     void shouldReturnAllCourseImplementationsWhenDistanceNotProvided() {
         CourseImpDTO dto1 = new CourseImpDTO("Curso 1", 1, 10, null, "Detalhes", 1000.0, null);
@@ -221,5 +163,12 @@ class FafylServiceTest {
         List<CourseImpDTO> result = fafylService.findWithoutDistance(List.of(1, 2));
         assertThat(result).hasSize(2);
         verify(courseImpRepository).findAllCourseImpDTO();
+    }
+
+    private Course buildCourse(String name, double d, double i, double s, double c) {
+        Course course = new Course();
+        course.setName(name);
+        course.setDiscWeights(Map.of('D', d, 'I', i, 'S', s, 'C', c));
+        return course;
     }
 }

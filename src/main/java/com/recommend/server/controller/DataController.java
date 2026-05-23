@@ -3,9 +3,11 @@ package com.recommend.server.controller;
 import com.recommend.server.dto.CollegeDTO;
 import com.recommend.server.dto.CourseDTO;
 import com.recommend.server.dto.CourseImpDTO;
+import com.recommend.server.dto.QuestionDTO;
 import com.recommend.server.model.College;
 import com.recommend.server.model.Course;
 import com.recommend.server.model.CourseImp;
+import com.recommend.server.model.Question;
 import com.recommend.server.service.DataService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +40,11 @@ public class DataController {
     @PostMapping("/model/course")
     public ResponseEntity<List<Course>> insertModelCourses(@RequestBody List<CourseDTO> courses) {
         return ResponseEntity.ok(dataService.insertCourses(courses));
+    }
+
+    @PostMapping("/data/questions")
+    public ResponseEntity<List<Question>> insertQuestions(@RequestBody List<QuestionDTO> questions) {
+        return ResponseEntity.ok(dataService.insertQuestions(questions));
     }
 
     @GetMapping("/course")

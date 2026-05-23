@@ -1,14 +1,19 @@
 package com.recommend.server.service;
 
+import com.recommend.server.dto.AlternativeDTO;
 import com.recommend.server.dto.CollegeDTO;
 import com.recommend.server.dto.CourseDTO;
 import com.recommend.server.dto.CourseImpDTO;
+import com.recommend.server.dto.QuestionDTO;
+import com.recommend.server.model.Alternative;
 import com.recommend.server.model.College;
 import com.recommend.server.model.Course;
 import com.recommend.server.model.CourseImp;
+import com.recommend.server.model.Question;
 import com.recommend.server.repository.CollegeRepository;
 import com.recommend.server.repository.CourseImpRepository;
 import com.recommend.server.repository.CourseRepository;
+import com.recommend.server.repository.QuestionRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -19,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,6 +33,7 @@ public class DataService {
     private final CourseRepository courseRepository;
     private final CollegeRepository collegeRepository;
     private final CourseImpRepository courseImpRepository;
+    private final QuestionRepository questionRepository;
     private final ImageStorageService imageStorageService;
 
     @PersistenceContext
@@ -34,10 +41,12 @@ public class DataService {
 
     @Autowired
     public DataService(CourseRepository courseRepository, CollegeRepository collegeRepository,
-                       CourseImpRepository courseImpRepository, ImageStorageService imageStorageService) {
+                       CourseImpRepository courseImpRepository, QuestionRepository questionRepository,
+                       ImageStorageService imageStorageService) {
         this.collegeRepository = collegeRepository;
         this.courseRepository = courseRepository;
         this.courseImpRepository = courseImpRepository;
+        this.questionRepository = questionRepository;
         this.imageStorageService = imageStorageService;
     }
 
@@ -46,8 +55,7 @@ public class DataService {
                 .map(dto -> {
                     Course course = new Course();
                     course.setName(dto.name());
-                    course.setAbilities(dto.abilities());
-                    course.setCantBe(dto.cantBe());
+                    course.setDiscWeights(dto.discWeights());
                     course.setDescription(dto.description());
                     return course;
                 })
@@ -127,6 +135,30 @@ public class DataService {
 
         courseImp.setCollege(college);
         return courseImpRepository.save(courseImp);
+    }
+
+    @Transactional
+    public List<Question> insertQuestions(List<QuestionDTO> questionDTOList) {
+        List<Question> questions = new ArrayList<>();
+        for (QuestionDTO dto : questionDTOList) {
+            Question question = new Question();
+            question.setText(dto.text());
+
+            List<Alternative> alternatives = new ArrayList<>();
+            for (AlternativeDTO altDTO : dto.alternatives()) {
+                Alternative alt = new Alternative();
+                alt.setText(altDTO.text());
+                alt.setDimension(altDTO.dimension());
+                alt.setWeight(altDTO.weight());
+                alt.setQuestion(question);
+                alternatives.add(alt);
+            }
+
+            question.setAlternatives(alternatives);
+            questions.add(question);
+        }
+
+        return questionRepository.saveAll(questions);
     }
 
     @Transactional

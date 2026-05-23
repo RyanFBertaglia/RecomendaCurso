@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,7 +41,7 @@ class DataServiceTransactionTest {
     @Test
     void insertCoursesShouldUseTransactionalAnnotation() {
         List<CourseDTO> courses = List.of(
-                new CourseDTO("Course 1", List.of("skill1"), List.of("cant1"), "Description 1")
+                new CourseDTO("Course 1", Map.of('D', 0.5, 'I', 0.5, 'S', 0.5, 'C', 0.5), "Description 1")
         );
 
         when(courseRepository.saveAll(any())).thenReturn(List.of());

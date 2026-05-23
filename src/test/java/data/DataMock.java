@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class DataMock {
@@ -16,17 +17,24 @@ public class DataMock {
     public static List<Course> listCourses() {
         List<Course> courses = new ArrayList<>();
 
-        courses.add(new Course("Química", Arrays.asList("Matemática", "Curioso", "Sério")));
-        courses.add(new Course("Direito", Arrays.asList("Focado", "Sério", "Falar em público")));
-        courses.add(new Course("Medicina", Arrays.asList("Focado", "Sério", "Biologia")));
-        courses.add(new Course("Engenharia", Arrays.asList("Matemática", "Raciocínio Lógico", "Sério")));
+        courses.add(buildCourse("Química", 0.3, 0.4, 0.6, 0.9));
+        courses.add(buildCourse("Direito", 1.0, 0.5, 0.8, 0.2));
+        courses.add(buildCourse("Medicina", 0.8, 0.2, 1.0, 0.5));
+        courses.add(buildCourse("Engenharia", 0.5, 1.0, 0.2, 0.8));
 
-        courses.add(new Course("Artes", Arrays.asList("Criatividade", "Descontraido")));
-        courses.add(new Course("Design", Arrays.asList("Criatividade", "Desenho", "Focado")));
-        courses.add(new Course("Gastronomia", Arrays.asList("Cozinha", "Descontraido", "Prática")));
-        courses.add(new Course("Ti", Arrays.asList("Matemática", "Lógica", "Trabalho remoto")));
+        courses.add(buildCourse("Artes", 0.2, 0.9, 0.5, 0.7));
+        courses.add(buildCourse("Design", 0.3, 0.8, 0.4, 0.9));
+        courses.add(buildCourse("Gastronomia", 0.4, 0.7, 0.6, 0.3));
+        courses.add(buildCourse("Ti", 0.6, 0.3, 0.4, 1.0));
 
         return courses;
+    }
+
+    private static Course buildCourse(String name, double d, double i, double s, double c) {
+        Course course = new Course();
+        course.setName(name);
+        course.setDiscWeights(Map.of('D', d, 'I', i, 'S', s, 'C', c));
+        return course;
     }
 
     public static College defaultCollege() {

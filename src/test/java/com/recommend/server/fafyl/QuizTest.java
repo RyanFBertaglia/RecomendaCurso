@@ -27,17 +27,30 @@ public class QuizTest {
 
     @BeforeEach
     void setUp() {
-        Alternative altD = new Alternative(1, "Sim",  'D', 1.0);
-        Alternative altI = new Alternative(2, "Não",  'I', 0.5);
-        Alternative altS = new Alternative(3, "Sim",  'S', 0.8);
-        Alternative altC = new Alternative(4, "Não",  'C', 0.2);
-        quiz = new Question(1, "Você prefere liderar decisões?", List.of(altD, altI, altS, altC));
+        Question q = new Question();
+        q.setText("Você prefere liderar decisões?");
+
+        Alternative altD = new Alternative();
+        altD.setId(1); altD.setText("Sim"); altD.setDimension('D'); altD.setWeight(1.0); altD.setQuestion(q);
+
+        Alternative altI = new Alternative();
+        altI.setId(2); altI.setText("Não"); altI.setDimension('I'); altI.setWeight(0.5); altI.setQuestion(q);
+
+        Alternative altS = new Alternative();
+        altS.setId(3); altS.setText("Sim"); altS.setDimension('S'); altS.setWeight(0.8); altS.setQuestion(q);
+
+        Alternative altC = new Alternative();
+        altC.setId(4); altC.setText("Não"); altC.setDimension('C'); altC.setWeight(0.2); altC.setQuestion(q);
+
+        q.setAlternatives(List.of(altD, altI, altS, altC));
+        quiz = q;
     }
 
     @Test @Order(1)
     @DisplayName("Alternative deve armazenar seus campos corretamente")
     void testAlternativeFields() {
-        Alternative alt = new Alternative(1, "Sim", 'D', 1.0);
+        Alternative alt = new Alternative();
+        alt.setId(1); alt.setText("Sim"); alt.setDimension('D'); alt.setWeight(1.0);
         assertAll("alternative fields",
                 () -> assertEquals(1,    alt.getId()),
                 () -> assertEquals("Sim", alt.getText()),
@@ -49,7 +62,8 @@ public class QuizTest {
     @Test @Order(2)
     @DisplayName("Weight deve estar no intervalo [0.0, 1.0]")
     void testAlternativeWeightRange() {
-        Alternative alt = new Alternative(1, "X", 'D', 0.75);
+        Alternative alt = new Alternative();
+        alt.setText("X"); alt.setDimension('D'); alt.setWeight(0.75);
         assertTrue(alt.getWeight() >= 0.0 && alt.getWeight() <= 1.0,
                 "Weight fora do range [0, 1]: " + alt.getWeight());
     }
@@ -110,14 +124,9 @@ public class QuizTest {
         }
     }
 
-    // -------------------------------------------------------
-    // 4. Matching — curso mais compatível com respostas do usuário
-    // -------------------------------------------------------
-
     @Test @Order(9)
     @DisplayName("Perfil alto em D deve recomendar Direito")
     void testMatchHighD() {
-        // Usuário respondeu peso máximo em D, mínimo nas demais
         Map<Character, Double> userProfile = Map.of('D', 1.0, 'I', 0.0, 'S', 0.0, 'C', 0.0);
         CourseDISC best = findBestMatch(userProfile, courses);
         assertEquals("Direito", best.getName());

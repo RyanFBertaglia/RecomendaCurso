@@ -29,7 +29,7 @@ public class FafylController {
             @Valid @RequestBody Quiz quiz,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "100") int size,
-            @RequestParam(defaultValue = "incidence") String sortBy,
+            @RequestParam(defaultValue = "score") String sortBy,
             @RequestParam(defaultValue = "desc") String direction) {
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Page<Fafyl> fafyl = fafylService.findAllFafyl(quiz, PageRequest.of(page, size, sort));

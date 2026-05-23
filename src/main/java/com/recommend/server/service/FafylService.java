@@ -48,10 +48,9 @@ public class FafylService {
     public Page<Fafyl> findAllFafyl(Quiz quiz, Pageable pageable) {
         try (Stream<Course> stream = courseRepository.streamAll()) {
             List<Fafyl> all = stream
-                    .filter(course -> course.getAbilities().stream().noneMatch(quiz.getUserCantBe()::contains))
-                    .map(curso -> new Fafyl(curso.compare(quiz.getAbilities()), curso))
-                    .filter(resp -> resp.incidence() > 0)
-                    .sorted(Comparator.comparingInt(Fafyl::incidence).reversed())
+                    .map(course -> new Fafyl(course.dotProduct(quiz.getDiscProfile()), course))
+                    .filter(fafyl -> fafyl.score() > 0)
+                    .sorted(Comparator.comparingDouble(Fafyl::score).reversed())
                     .toList();
 
             int start = (int) pageable.getOffset();
@@ -68,19 +67,12 @@ public class FafylService {
         }
     }
 
-
-//    public List<CourseImp> findInDistance(List<Integer> courses, Double distance, Coordinates user) {
-//        List<CourseImp> all = courseImpRepository.findByCourseIdIn(courses);
-//        return location.filterByLocation(all, distance, user);
-//    }
-
     public List<CourseImpDTO> findInDistance(List<Integer> courses,
                                              Double maxDistance,
                                              Coordinates user) {
         final double MARGIN_FACTOR = 1.3;
         double expandedDistance = maxDistance * MARGIN_FACTOR;
 
-        // Haversine in the database, no College loading
         List<CourseImpRepository.CourseImpProjection> candidates = courseImpRepository.findNearbyCourses(
                 courses,
                 user.lat(),
@@ -88,7 +80,6 @@ public class FafylService {
                 expandedDistance
         );
 
-        // DTO e filter with API
         return candidates.stream()
                 .map(this::toDTO)
                 .filter(dto -> dto.locale() != null)

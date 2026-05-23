@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -42,7 +43,7 @@ class CollegeImageTest {
 
     private int createDefaultCollege() throws Exception {
         String courseJson = objectMapper.writeValueAsString(List.of(
-                new CourseDTO("Engenharia", List.of("Cálculo", "Lógica"), List.of("Desorganizado"), null)
+                new CourseDTO("Engenharia", Map.of('D', 0.5, 'I', 1.0, 'S', 0.2, 'C', 0.8), null)
         ));
 
         String courseResponse = mockMvc.perform(post("/model/course")

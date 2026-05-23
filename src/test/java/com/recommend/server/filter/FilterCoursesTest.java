@@ -10,9 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,41 +24,42 @@ public class FilterCoursesTest {
     CourseRepository courseRepository;
 
     @Test
-    void testFilterCourses() {
-
+    void testFilterCoursesByDiscScore() {
         List<Course> mockCourses = List.of(
-                new Course("Design", Arrays.asList("Criatividade", "Empatia")),
-                new Course("Engenharia", Arrays.asList("Matemática", "Precisão")),
-                new Course("História da Arte", Arrays.asList("História da Arte", "Criatividade"))
+                buildCourse("Design", Map.of('D', 0.2, 'I', 0.8, 'S', 0.5, 'C', 1.0)),
+                buildCourse("Engenharia", Map.of('D', 0.5, 'I', 1.0, 'S', 0.2, 'C', 0.8)),
+                buildCourse("História da Arte", Map.of('D', 0.3, 'I', 0.6, 'S', 0.7, 'C', 0.4))
         );
 
         when(courseRepository.count()).thenReturn((long) mockCourses.size());
         when(courseRepository.streamAll()).thenReturn(mockCourses.stream());
 
-        Quiz quiz = new Quiz(
-                Arrays.asList("Memorização", "Empatia", "Ergonomia", "Sustentabilidade", "História da Arte"),
-                Arrays.asList("Averso a normas", "Impreciso", "Escuta Ativa", "Desorganizado financeiramente")
-        );
+        Quiz quiz = new Quiz(Map.of('D', 0.0, 'I', 1.0, 'S', 0.0, 'C', 0.0));
 
         assertTrue(courseRepository.count() > 0);
 
         try (Stream<Course> stream = courseRepository.streamAll()) {
-
             List<Fafyl> courses = stream
-                    .filter(course -> course.getAbilities().stream().noneMatch(quiz.getUserCantBe()::contains))
-                    .map(curso -> new Fafyl(curso.compare(quiz.getAbilities()), curso))
-                    .filter(resp -> resp.incidence() > 0)
-                    .sorted(Comparator.comparingInt(Fafyl::incidence).reversed())
+                    .map(curso -> new Fafyl(curso.dotProduct(quiz.getDiscProfile()), curso))
+                    .filter(resp -> resp.score() > 0)
+                    .sorted((a, b) -> Double.compare(b.score(), a.score()))
                     .toList();
 
             assertFalse(courses.isEmpty());
 
             courses.forEach(c ->
-                    System.out.println(c.course().getName() + " - Afinidade: " + c.incidence())
+                    System.out.println(c.course().getName() + " - Score: " + c.score())
             );
 
             verify(courseRepository).count();
             verify(courseRepository).streamAll();
         }
+    }
+
+    private Course buildCourse(String name, Map<Character, Double> discWeights) {
+        Course c = new Course();
+        c.setName(name);
+        c.setDiscWeights(discWeights);
+        return c;
     }
 }

@@ -19,6 +19,7 @@ import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,26 +49,21 @@ public class GeneralTest {
     }
 
     @Test
-    void shouldReturnRankedCoursesBasedOnAbilities() {
-        Course course1 = buildCourse(1, "Engenharia de Software", List.of("Cálculo", "Lógica"));
-        Course course2 = buildCourse(2, "Design Gráfico",        List.of("Criatividade", "Memorização"));
-        Course course3 = buildCourse(3, "Medicina",              List.of("Memorização", "Biologia"));
+    void shouldReturnRankedCoursesBasedOnDiscProfile() {
+        Course course1 = buildCourse(1, "Engenharia de Software", Map.of('D', 0.5, 'I', 1.0, 'S', 0.2, 'C', 0.8));
+        Course course2 = buildCourse(2, "Design Gráfico",        Map.of('D', 0.2, 'I', 0.8, 'S', 0.5, 'C', 1.0));
+        Course course3 = buildCourse(3, "Medicina",              Map.of('D', 0.8, 'I', 0.2, 'S', 1.0, 'C', 0.5));
 
         when(courseRepository.streamAll())
                 .thenReturn(Stream.of(course1, course2, course3));
 
-        Quiz quiz = new Quiz(
-                List.of("Cálculo", "Memorização"),
-                List.of("Memorização")
-        );
+        Quiz quiz = new Quiz(Map.of('D', 1.0, 'I', 0.0, 'S', 0.0, 'C', 0.0));
 
         List<Fafyl> result = fafylService.findAllFafyl(quiz);
 
         assertThat(result).isNotEmpty();
-        assertThat(result).allMatch(f -> f.incidence() > 0);
-        assertThat(result)
-                .extracting(f -> f.course().getId())
-                .doesNotContain(3);
+        assertThat(result).allMatch(f -> f.score() > 0);
+        assertThat(result.get(0).course().getName()).isEqualTo("Medicina");
 
         IO.println(result);
     }
@@ -117,11 +113,11 @@ public class GeneralTest {
         IO.println(courses);
     }
 
-    private Course buildCourse(int id, String name, List<String> abilities) {
+    private Course buildCourse(int id, String name, Map<Character, Double> discWeights) {
         Course c = new Course();
         c.setId(id);
         c.setName(name);
-        c.setAbilities(abilities);
+        c.setDiscWeights(discWeights);
         return c;
     }
 
