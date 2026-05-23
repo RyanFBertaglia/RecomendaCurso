@@ -5,9 +5,11 @@ import com.recommend.server.exception.BadCredentials;
 import com.recommend.server.exception.EmailAlreadyExists;
 import com.recommend.server.exception.LocationNotProvided;
 import com.recommend.server.exception.TokenInvalid;
+import com.recommend.server.model.Capelinho;
 import com.recommend.server.model.Course;
 import com.recommend.server.model.History;
 import com.recommend.server.model.User;
+import com.recommend.server.repository.CapelinhoRepository;
 import com.recommend.server.repository.HistoryRepository;
 import com.recommend.server.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,6 +40,9 @@ public class AuthService {
 
     @Autowired
     HistoryRepository historyRepository;
+
+    @Autowired
+    CapelinhoRepository capelinhoRepository;
 
     @Autowired
     AuthenticationManager authenticationManager;
@@ -158,5 +163,16 @@ public class AuthService {
 
     public Page<History> getHistoryPage(Pageable pageable) {
         return historyRepository.findByUserId(getUser().getId(), pageable);
+    }
+
+    @Transactional
+    public UserDTO updateCapelinho(Integer capelinhoId) {
+        User user = getUser();
+        Capelinho capelinho = capelinhoRepository.findById(capelinhoId)
+                .orElseThrow(() -> new RuntimeException("Capelinho not found with ID: " + capelinhoId));
+
+        user.setCapelinho(capelinho);
+        userRepository.save(user);
+        return user.getUserDTO();
     }
 }
