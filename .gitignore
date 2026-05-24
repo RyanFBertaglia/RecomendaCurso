@@ -16,6 +16,7 @@ target/
 *.iml
 *.ipr
 *.properties
+docs
 
 .vscode/
 .env
@@ -23,3 +24,6 @@ src/main/resources/
 src/test/resources/
 data:dcbapp.mv.db
 data:dcbapp.trace.db
+mvnw
+mvnw.cmd
+docs/logic_insert.txt

@@ -64,10 +64,10 @@ public class AnswerQuestionsTest {
         return switch (label) {
             case "fafyl" -> "O FAFYL recomenda cursos com base nas suas habilidades.";
             case "quiz" -> "Você responde um quiz com suas habilidades.";
-            case "abilities" -> "Abilities são características que combinam com cursos.";
-            case "cantbe" -> "CantBe elimina cursos incompatíveis.";
-            case "recomendacao" -> "O sistema compara suas habilidades com os cursos.";
-            case "score" -> "Score é o número de habilidades em comum.";
+            case "abilities" -> "Cada curso tem um perfil DISC ideal (pesos D, I, S, C).";
+            case "cantbe" -> "O filtro por incompatibilidade foi removido; o ranking é puramente DISC.";
+            case "recomendacao" -> "O sistema calcula o produto escalar entre seu perfil DISC e os pesos do curso.";
+            case "score" -> "Score é o resultado do produto escotal DISC entre seu perfil e o curso.";
             case "sem_resultado" -> "Nenhum curso combinou com seu perfil.";
             case "ranking" -> "Cursos com mais match aparecem primeiro.";
             case "melhorar" -> "Adicione mais habilidades no quiz.";

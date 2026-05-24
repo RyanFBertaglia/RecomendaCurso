@@ -2,6 +2,7 @@ package com.recommend.server.controller;
 
 import com.recommend.server.exception.*;
 import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.validation.ConstraintViolation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -16,7 +17,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     private ResponseEntity<String> validationFail(ConstraintViolationException ex) {
         String errors = ex.getConstraintViolations().stream()
-                .map(v -> v.getMessage())
+                .map(ConstraintViolation::getMessage)
                 .collect(Collectors.joining(", "));
         return ResponseEntity.badRequest().body(errors);
     }
@@ -49,5 +50,10 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ExpiredJwtException.class)
     private ResponseEntity<String> ExpiredJwt(ExpiredJwtException ex) {
         return ResponseEntity.status(401).body("Token expired");
+    }
+
+    @ExceptionHandler(CollegeNotFound.class)
+    private ResponseEntity<String> handleCollegeNotFound(CollegeNotFound ex) {
+        return ResponseEntity.notFound().build();
     }
 }

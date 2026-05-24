@@ -61,7 +61,7 @@ public class ChatService {
         return switch (label) {
             case "fafyl" -> "O FAFYL recomenda cursos com base nas suas habilidades.";
             case "quiz" -> "Você responde um quiz com suas habilidades.";
-            case "abilities" -> "Abilities são características que combinam com cursos.";
+            case "abilities" -> "Cada curso tem um perfil DISC ideal (pesos D, I, S, C).";
             case "cantbe" -> "CantBe elimina cursos incompatíveis.";
             case "recomendacao" -> "O sistema compara suas habilidades com os cursos.";
             case "score" -> "Score é o número de habilidades em comum.";
