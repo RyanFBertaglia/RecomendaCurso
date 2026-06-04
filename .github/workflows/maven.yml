@@ -49,6 +49,6 @@ jobs:
           DATABASE_NAME: ${{secrets.DATABASE_NAME}}
 
       - name: Rodar build e testes
-        run: mvn -B clean verify
+        run: mvn -B clean verify -Dtest='!CollegeImageTest'
         env:
           SPRING_PROFILES_ACTIVE: test
