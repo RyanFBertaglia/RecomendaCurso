@@ -27,6 +27,8 @@ public class Course {
 
     private String description;
 
+    private String category;
+
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference("course-courseImps")
     private List<CourseImp> courseImps;

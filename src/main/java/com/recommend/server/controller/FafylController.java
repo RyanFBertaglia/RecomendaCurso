@@ -41,18 +41,34 @@ public class FafylController {
     public ResponseEntity<List<CourseImpDTO>> findAllCourses(
             @Valid @RequestBody CoursesRequest coursesRequest
     ) {
-        List<CourseImpDTO> possible;
-        if(coursesRequest.location() != null && coursesRequest.distance() != null) {
-            possible =  fafylService.findInDistance(coursesRequest.courses(),
-                    coursesRequest.distance(), coursesRequest.location());
+        boolean hasLocation = coursesRequest.location() != null && coursesRequest.distance() != null;
+        boolean hasFees = coursesRequest.minFees() != null || coursesRequest.maxFees() != null;
+        boolean hasPeriod = coursesRequest.period() != null && !coursesRequest.period().isBlank();
+        boolean hasDistance = coursesRequest.distance() != null;
+
+        Coordinates userLocation = hasLocation ? coursesRequest.location() : authService.getUserDTO().locale();
+
+        if (hasDistance && (hasFees || hasPeriod)) {
+            List<CourseImpDTO> possible = fafylService.findInDistanceFiltered(
+                    coursesRequest.courses(),
+                    coursesRequest.distance(),
+                    userLocation,
+                    coursesRequest.minFees(),
+                    coursesRequest.maxFees(),
+                    coursesRequest.period()
+            );
             return ResponseEntity.ok(possible);
         }
-        Coordinates userLocation = authService.getUserDTO().locale();
-        if(coursesRequest.distance() != null) {
-            possible =  fafylService.findInDistance(coursesRequest.courses(),
-                    coursesRequest.distance(), userLocation);
+
+        if (hasDistance) {
+            List<CourseImpDTO> possible = fafylService.findInDistance(
+                    coursesRequest.courses(),
+                    coursesRequest.distance(),
+                    userLocation
+            );
             return ResponseEntity.ok(possible);
         }
+
         return ResponseEntity.ok(fafylService.findWithoutDistance(coursesRequest.courses()));
     }
     /*

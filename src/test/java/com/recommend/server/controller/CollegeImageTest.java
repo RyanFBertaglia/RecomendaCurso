@@ -43,7 +43,7 @@ class CollegeImageTest {
 
     private int createDefaultCollege() throws Exception {
         String courseJson = objectMapper.writeValueAsString(List.of(
-                new CourseDTO("Engenharia", Map.of('D', 0.5, 'I', 1.0, 'S', 0.2, 'C', 0.8), null)
+                new CourseDTO("Engenharia", Map.of('D', 0.5, 'I', 1.0, 'S', 0.2, 'C', 0.8), null, null)
         ));
 
         String courseResponse = mockMvc.perform(post("/model/course")

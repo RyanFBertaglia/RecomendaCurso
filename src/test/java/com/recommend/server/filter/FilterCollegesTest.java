@@ -31,7 +31,10 @@ public class FilterCollegesTest {
 
     @Test
     void findNearCourses() {
-        List<CourseImp> newList = location.filterByLocation(courseChoose, 15000.0, user);
+        List<CourseImp> newList = courseChoose.stream()
+                .filter(c -> c.getLocale() != null)
+                .filter(c -> location.haversine(c.getLocale(), user) <= 15000.0)
+                .toList();
         assertThat(newList, hasSize(3));
     }
 }

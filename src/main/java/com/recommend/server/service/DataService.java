@@ -16,16 +16,20 @@ import com.recommend.server.repository.CourseRepository;
 import com.recommend.server.repository.QuestionRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import com.recommend.server.exception.CollegeNotFound;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class DataService {
@@ -57,6 +61,7 @@ public class DataService {
                     course.setName(dto.name());
                     course.setDiscWeights(dto.discWeights());
                     course.setDescription(dto.description());
+                    course.setCategory(dto.category());
                     return course;
                 })
                 .toList();
@@ -205,11 +210,69 @@ public class DataService {
         return courseRepository.findAll(pageable);
     }
 
+    public Page<Course> findAllModelCourses(String category, Pageable pageable) {
+        if (category == null || category.isBlank()) {
+            return courseRepository.findAll(pageable);
+        }
+        String jpql = "SELECT c FROM Course c WHERE c.category = :category";
+        TypedQuery<Course> query = entityManager.createQuery(jpql, Course.class);
+        query.setParameter("category", category);
+        query.setFirstResult((int) pageable.getOffset());
+        query.setMaxResults(pageable.getPageSize());
+
+        TypedQuery<Long> countQuery = entityManager.createQuery(
+                "SELECT COUNT(c) FROM Course c WHERE c.category = :category", Long.class);
+        countQuery.setParameter("category", category);
+
+        List<Course> content = query.getResultList();
+        long total = countQuery.getSingleResult();
+        return new PageImpl<>(content, pageable, total);
+    }
+
     public List<College> findAllColleges() { return collegeRepository.findAll(); }
     public Page<College> findAllColleges(Pageable pageable) { return collegeRepository.findAll(pageable); }
+
+    public Page<College> findCollegesNearby(double lat, double lon, double maxDistance, Pageable pageable) {
+        return collegeRepository.findCollegesNearby(lat, lon, maxDistance, pageable);
+    }
+
     public List<CourseImp> findAllCourses() { return courseImpRepository.findAll(); }
     public Page<CourseImp> findAllCourses(Pageable pageable) { return courseImpRepository.findAll(pageable); }
-    public College findOneCollege(Integer id) { return collegeRepository.findById(id).orElse(null); }
+
+    public Page<CourseImp> findAllCourses(Double minFees, Double maxFees, Pageable pageable) {
+        StringBuilder jpql = new StringBuilder("SELECT c FROM CourseImp c WHERE 1=1");
+        Map<String, Object> params = new HashMap<>();
+
+        if (minFees != null) {
+            jpql.append(" AND c.fees >= :minFees");
+            params.put("minFees", minFees);
+        }
+        if (maxFees != null) {
+            jpql.append(" AND c.fees <= :maxFees");
+            params.put("maxFees", maxFees);
+        }
+
+        TypedQuery<CourseImp> query = entityManager.createQuery(jpql.toString(), CourseImp.class);
+        params.forEach(query::setParameter);
+        query.setFirstResult((int) pageable.getOffset());
+        query.setMaxResults(pageable.getPageSize());
+
+        StringBuilder countJpql = new StringBuilder("SELECT COUNT(c) FROM CourseImp c WHERE 1=1");
+        if (minFees != null) countJpql.append(" AND c.fees >= :minFees");
+        if (maxFees != null) countJpql.append(" AND c.fees <= :maxFees");
+
+        TypedQuery<Long> countQuery = entityManager.createQuery(countJpql.toString(), Long.class);
+        params.forEach(countQuery::setParameter);
+
+        List<CourseImp> content = query.getResultList();
+        long total = countQuery.getSingleResult();
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    public College findOneCollege(Integer id) {
+        return collegeRepository.findById(id)
+                .orElseThrow(() -> new CollegeNotFound("College not found with ID: " + id));
+    }
     public CourseImp findOneCourseImp(Integer id) { return courseImpRepository.findById(id).orElse(null); }
     public Course findOneCourse(Integer id) { return courseRepository.findById(id).orElse(null); }
     public CourseImp findOneCourseImpByCourseIdAndCollegeId(Integer courseId, Integer collegeId) { return courseImpRepository.findByCourseIdAndCollegeId(courseId, collegeId); }

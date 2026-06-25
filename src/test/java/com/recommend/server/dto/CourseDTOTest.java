@@ -15,7 +15,8 @@ class CourseDTOTest {
         CourseDTO dto = new CourseDTO(
                 "Ciência da Computação",
                 Map.of('D', 0.6, 'I', 0.3, 'S', 0.4, 'C', 0.9),
-                "Focado no desenvolvimento de tecnologias, algoritmos e soluções de software."
+                "Focado no desenvolvimento de tecnologias, algoritmos e soluções de software.",
+                "EXATAS"
         );
 
         assertEquals("Ciência da Computação", dto.name());

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 public class DataController {
@@ -32,9 +33,10 @@ public class DataController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "name") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction) {
+            @RequestParam(defaultValue = "asc") String direction,
+            @RequestParam(required = false) String category) {
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
-        return ResponseEntity.ok(dataService.findAllModelCourses(PageRequest.of(page, size, sort)));
+        return ResponseEntity.ok(dataService.findAllModelCourses(category, PageRequest.of(page, size, sort)));
     }
 
     @PostMapping("/model/course")
@@ -52,9 +54,11 @@ public class DataController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "name") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction) {
+            @RequestParam(defaultValue = "asc") String direction,
+            @RequestParam(required = false) Double minFees,
+            @RequestParam(required = false) Double maxFees) {
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
-        return ResponseEntity.ok(dataService.findAllCourses(PageRequest.of(page, size, sort)));
+        return ResponseEntity.ok(dataService.findAllCourses(minFees, maxFees, PageRequest.of(page, size, sort)));
     }
 
     @PostMapping("/course")
@@ -67,8 +71,14 @@ public class DataController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "name") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction) {
+            @RequestParam(defaultValue = "asc") String direction,
+            @RequestParam(required = false) Double lat,
+            @RequestParam(required = false) Double lon,
+            @RequestParam(required = false) Double maxDistance) {
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        if (lat != null && lon != null && maxDistance != null) {
+            return ResponseEntity.ok(dataService.findCollegesNearby(lat, lon, maxDistance, PageRequest.of(page, size, sort)));
+        }
         return ResponseEntity.ok(dataService.findAllColleges(PageRequest.of(page, size, sort)));
     }
 

@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class AuthService {
@@ -104,7 +103,7 @@ public class AuthService {
     public UserDTO getUserDTO() {
         String email = getUserEmail();
         User user = userRepository.findByEmail(email)
-                .orElseThrow();
+                .orElseThrow(BadCredentials::new);
 
         return user.getUserDTO();
     }
@@ -116,13 +115,14 @@ public class AuthService {
     }
 
     public String getUserEmail() {
-        if (SecurityContextHolder.getContext().getAuthentication() == null)
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null)
             throw new BadCredentials("User not authenticated");
 
-        return (String) Objects.requireNonNull(SecurityContextHolder
-                        .getContext()
-                        .getAuthentication())
-                .getPrincipal();
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof String email)
+            return email;
+        throw new BadCredentials("User not authenticated");
     }
 
     @Transactional
@@ -134,7 +134,7 @@ public class AuthService {
             throw new LocationNotProvided("Coordinates not provided");
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow();
+                .orElseThrow(BadCredentials::new);
 
         user.setLocale(coordinates);
 

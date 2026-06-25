@@ -41,7 +41,7 @@ class DataServiceTransactionTest {
     @Test
     void insertCoursesShouldUseTransactionalAnnotation() {
         List<CourseDTO> courses = List.of(
-                new CourseDTO("Course 1", Map.of('D', 0.5, 'I', 0.5, 'S', 0.5, 'C', 0.5), "Description 1")
+                new CourseDTO("Course 1", Map.of('D', 0.5, 'I', 0.5, 'S', 0.5, 'C', 0.5), "Description 1", null)
         );
 
         when(courseRepository.saveAll(any())).thenReturn(List.of());

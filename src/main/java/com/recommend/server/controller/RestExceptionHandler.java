@@ -56,4 +56,9 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     private ResponseEntity<String> handleCollegeNotFound(CollegeNotFound ex) {
         return ResponseEntity.notFound().build();
     }
+
+    @ExceptionHandler(Empty.class)
+    private ResponseEntity<String> handleEmpty(Empty data) {
+        return ResponseEntity.badRequest().body(data.getMessage());
+    }
 }

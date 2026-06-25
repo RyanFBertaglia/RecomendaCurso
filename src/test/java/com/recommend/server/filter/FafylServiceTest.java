@@ -134,14 +134,10 @@ class FafylServiceTest {
                 anyDouble()
         )).thenReturn(List.of(p1, p2));
 
-        when(location.distance(any(), eq(user)))
-                .thenReturn(5000.0)
-                .thenReturn(20000.0);
-
         List<CourseImpDTO> result =
                 fafylService.findInDistance(ids, 10000.0, user);
 
-        assertThat(result).hasSize(1);
+        assertThat(result).hasSize(2);
         assertThat(result.get(0).courseId()).isEqualTo(1);
 
         verify(courseImpRepository).findNearbyCourses(
@@ -157,12 +153,12 @@ class FafylServiceTest {
         CourseImpDTO dto1 = new CourseImpDTO("Curso 1", 1, 10, null, "Detalhes", 1000.0, null);
         CourseImpDTO dto2 = new CourseImpDTO("Curso 2", 2, 20, null, "Detalhes", 2000.0, null);
 
-        when(courseImpRepository.findAllCourseImpDTO())
+        when(courseImpRepository.findAllCourseImpDTO(any()))
                 .thenReturn(List.of(dto1, dto2));
 
         List<CourseImpDTO> result = fafylService.findWithoutDistance(List.of(1, 2));
         assertThat(result).hasSize(2);
-        verify(courseImpRepository).findAllCourseImpDTO();
+        verify(courseImpRepository).findAllCourseImpDTO(any());
     }
 
     private Course buildCourse(String name, double d, double i, double s, double c) {

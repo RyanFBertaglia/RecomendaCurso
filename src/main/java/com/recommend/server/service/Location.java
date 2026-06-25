@@ -1,51 +1,19 @@
 package com.recommend.server.service;
 
 import com.recommend.server.dto.Coordinates;
-import com.recommend.server.exception.LocationNotFound;
-import com.recommend.server.model.CourseImp;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 public class Location {
 
-    @Value("${geoapify.api.key}")
-    private String API_KEY;
-
-    public List<CourseImp> filterByLocation(List<CourseImp> courses, Double max, Coordinates user) {
-        return courses.stream()
-                .filter(course -> course.getLocale() != null)
-                .filter(course -> {
-                    Double distance = distance(course.getLocale(), user);
-                    System.out.println("Distância: " + distance);
-                    System.out.println("Max: " + max);
-                    return distance <= max;
-                })
-                .toList();
-    }
-
-    public Double distance(Coordinates college, Coordinates user) {
-        String url = "https://api.geoapify.com/v1/routing"
-                + "?waypoints=" + user.lat() + "," + user.lon() + "|"
-                + college.lat() + "," + college.lon()
-                + "&mode=drive"
-                + "&apiKey=" + API_KEY;
-
-        String json = new RestTemplate().getForObject(url, String.class);
-
-        Pattern pattern = Pattern.compile("\"distance\":\\s*(\\d+(?:\\.\\d+)?)\\s*,\\s*\"time\":\\s*(\\d+(?:\\.\\d+)?)");
-        if(json==null) throw new LocationNotFound("Location not found");
-        Matcher matcher = pattern.matcher(json);
-
-        if (matcher.find()) {
-            return Double.parseDouble(matcher.group(1));
-        } else {
-            throw new LocationNotFound("Location not found");
-        }
+    public double haversine(Coordinates from, Coordinates to) {
+        final double R = 6371000;
+        double dLat = Math.toRadians(to.lat() - from.lat());
+        double dLon = Math.toRadians(to.lon() - from.lon());
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(from.lat())) * Math.cos(Math.toRadians(to.lat())) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
     }
 }

@@ -22,8 +22,10 @@ public class TestMock {
         Coordinates user = DataMock.defaultUser();
 
         for (CourseImp course : courseImps) {
-            double distance = location.distance(course.getLocale(), user);
-            IO.println("Distance between user and the" + course.getName() + "course is: " + distance);
+            if (course.getLocale() != null) {
+                double distance = location.haversine(course.getLocale(), user);
+                IO.println("Distance between user and the " + course.getName() + " course is: " + distance);
+            }
         }
     }
 }

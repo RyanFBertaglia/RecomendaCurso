@@ -92,13 +92,11 @@ public class GeneralTest {
                 anyDouble()
         )).thenReturn(List.of(proj1, proj2, proj3));
 
-        when(location.distance(new Coordinates(-22.8173, -47.0696), user)).thenReturn(5000.0);
-        when(location.distance(new Coordinates(-22.9950, -47.1189), user)).thenReturn(200000.0);
-
         CoursesRequest coursesRequest = new CoursesRequest(
                 List.of(1, 2, 3),
                 100000.0,
-                user
+                user,
+                null, null, null
         );
 
         List<CourseImpDTO> courses = fafylService.findInDistance(
@@ -107,7 +105,7 @@ public class GeneralTest {
                 coursesRequest.location()
         );
 
-        assertThat(courses).hasSize(1);
+        assertThat(courses).hasSize(2);
         assertThat(courses.getFirst().name()).isEqualTo("Engenharia de Software - UNICAMP");
 
         IO.println(courses);
