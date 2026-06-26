@@ -32,5 +32,4 @@ ENTRYPOINT ["java", \
   "-XX:ReservedCodeCacheSize=32m", \
   "-XX:+UseStringDeduplication", \
   "-Djava.security.egd=file:/dev/./urandom", \
-  "-Dspring.datasource.url=jdbc:h2:file:/app/data/dcbapp;DB_CLOSE_ON_EXIT=FALSE", \
   "org.springframework.boot.loader.launch.JarLauncher"]
