@@ -2,6 +2,7 @@ package com.recommend.server.controller;
 
 import com.recommend.server.dto.*;
 import com.recommend.server.service.AuthService;
+import com.recommend.server.service.ChatService;
 import com.recommend.server.service.FafylService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,9 @@ public class FafylController {
 
     @Autowired
     AuthService authService;
+
+    @Autowired
+    ChatService chatService;
 
     @GetMapping("/fafyl")
     public ResponseEntity<Page<Fafyl>> findAllFafyl(
@@ -70,6 +74,12 @@ public class FafylController {
         }
 
         return ResponseEntity.ok(fafylService.findWithoutDistance(coursesRequest.courses()));
+    }
+
+    @GetMapping("/chatbot")
+    @CrossOrigin("*")
+    public ResponseEntity<String> chatbot(@RequestParam String question) {
+        return ResponseEntity.ok(chatService.respond(question));
     }
     /*
         /register
