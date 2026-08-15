@@ -17,8 +17,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.print.attribute.standard.Media;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 public class DataController {
@@ -116,5 +118,10 @@ public class DataController {
     public ResponseEntity<?> clean() {
         dataService.clean();
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/model/course/{id}")
+    public ResponseEntity<Course> findOne(@PathVariable Integer id) {
+        return ResponseEntity.of(Optional.ofNullable(dataService.findOneCourse(id)));
     }
 }

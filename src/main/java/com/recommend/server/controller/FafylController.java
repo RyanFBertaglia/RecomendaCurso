@@ -77,7 +77,6 @@ public class FafylController {
     }
 
     @GetMapping("/chatbot")
-    @CrossOrigin("*")
     public ResponseEntity<String> chatbot(@RequestParam String question) {
         return ResponseEntity.ok(chatService.respond(question));
     }

@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import static com.mongodb.client.model.Filters.eq;
 
@@ -23,6 +24,7 @@ import static com.mongodb.client.model.Filters.eq;
 public class ImageStorageService {
 
     private static final String BUCKET_NAME = "images";
+    private static final Pattern OBJECT_ID_PATTERN = Pattern.compile("^[a-fA-F0-9]{24}$");
 
     private final GridFSBucket gridFSBucket;
 
@@ -50,6 +52,9 @@ public class ImageStorageService {
     }
 
     public ImageData getImage(String id) {
+        if (id == null || !OBJECT_ID_PATTERN.matcher(id).matches()) {
+            return null;
+        }
         ObjectId objectId = new ObjectId(id);
         GridFSFindIterable files = gridFSBucket.find(eq("_id", objectId));
         GridFSFile gridFSFile = files.first();
@@ -70,6 +75,9 @@ public class ImageStorageService {
     }
 
     public void deleteImage(String id) {
+        if (id == null || !OBJECT_ID_PATTERN.matcher(id).matches()) {
+            return;
+        }
         gridFSBucket.delete(new ObjectId(id));
     }
 
