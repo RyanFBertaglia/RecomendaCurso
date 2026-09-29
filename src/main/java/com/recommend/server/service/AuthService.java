@@ -17,7 +17,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -143,8 +142,7 @@ public class AuthService {
     }
 
     @Transactional
-    @Async
-    public History addHistory(Course course) {
+    public HistoryDTO addHistory(Course course) {
         User user = getUser();
         if (course == null)
             throw new BadCredentials("Course not provided");
@@ -154,15 +152,18 @@ public class AuthService {
         history.setCourse(course);
         history.setAccessedAt(new Date());
 
-        return historyRepository.save(history);
+        return HistoryDTO.from(historyRepository.save(history));
     }
 
-    public List<History> getHistory() {
-        return historyRepository.findByUserIdOrderByAccessedAtDesc(getUser().getId());
+    public List<HistoryDTO> getHistory() {
+        return historyRepository.findByUserIdOrderByAccessedAtDesc(getUser().getId())
+                .stream()
+                .map(HistoryDTO::from)
+                .toList();
     }
 
-    public Page<History> getHistoryPage(Pageable pageable) {
-        return historyRepository.findByUserId(getUser().getId(), pageable);
+    public Page<HistoryDTO> getHistoryPage(Pageable pageable) {
+        return historyRepository.findByUserId(getUser().getId(), pageable).map(HistoryDTO::from);
     }
 
     @Transactional

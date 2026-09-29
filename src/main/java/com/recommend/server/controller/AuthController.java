@@ -2,7 +2,6 @@ package com.recommend.server.controller;
 
 import com.recommend.server.dto.*;
 import com.recommend.server.model.Course;
-import com.recommend.server.model.History;
 import com.recommend.server.service.AuthService;
 import com.recommend.server.service.DataService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,19 +51,19 @@ public class AuthController {
     }
 
     @PostMapping("/history")
-    public ResponseEntity<History> addHistory(@RequestParam Integer idCourse) {
+    public ResponseEntity<HistoryDTO> addHistory(@RequestParam Integer idCourse) {
         if (idCourse == null) return ResponseEntity.badRequest().build();
         Course course = dataService.findOneCourse(idCourse);
         return ResponseEntity.ok().body(authService.addHistory(course));
     }
 
     @GetMapping("/history")
-    public ResponseEntity<List<History>> getHistory() {
+    public ResponseEntity<List<HistoryDTO>> getHistory() {
         return ResponseEntity.ok(authService.getHistory());
     }
 
     @GetMapping("/history/page")
-    public ResponseEntity<Page<History>> getHistoryPage(
+    public ResponseEntity<Page<HistoryDTO>> getHistoryPage(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "accessedAt") String sortBy,
