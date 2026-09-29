@@ -27,11 +27,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     UserRepository userRepository;
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        return request.getServletPath().startsWith("/");
-    }
-
-    @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             @NonNull HttpServletResponse response,
@@ -46,7 +41,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String token = authHeader.substring(7);
-        String email = jwtService.extractUserEmail(token);
+
+        String email;
+        try {
+            email = jwtService.extractUserEmail(token);
+        } catch (Exception e) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         if (email != null &&
                 SecurityContextHolder.getContext().getAuthentication() == null) {
